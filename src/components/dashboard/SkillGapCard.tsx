@@ -1,13 +1,12 @@
 'use client';
 
 import React from 'react';
-import { Student, Skill, Company } from '../../types';
+import { Student, Skill } from '../../types';
 import { useApp } from '../../context/AppContext';
 import { Badge } from '../common/Badge';
 import {
   Sparkles,
   Users,
-  Building2,
   ArrowRight,
   TrendingUp,
   AlertTriangle,
@@ -18,154 +17,124 @@ import {
 interface SkillGapCardProps {
   currentUser: Student;
   skills: Skill[];
-  companies: Company[];
   students: Student[];
 }
 
 export const SkillGapCard: React.FC<SkillGapCardProps> = ({
   currentUser,
   skills,
-  companies,
   students
 }) => {
   const { setActiveTab, setSelectedSkillForMentorSearch } = useApp();
 
-  // Find target domain and role
   const targetDomain = currentUser.targetDomain || 'Data Analytics';
 
-  // Gather student's existing skills
   const studentSkillMap = new Map<string, string>();
   currentUser.skillsToTeach.forEach((s) => studentSkillMap.set(s.skillName.toLowerCase(), s.proficiency));
   currentUser.skillsToLearn.forEach((s) => studentSkillMap.set(s.skillName.toLowerCase(), s.currentLevel));
 
-  // Determine top domain skills required by campus recruiters
   const domainSkills = skills.filter(
     (sk) => sk.domain.toLowerCase() === targetDomain.toLowerCase() || sk.category === 'Business & Analytics'
   );
 
-  // Compute skill gap items
   const skillGapItems = domainSkills.map((sk) => {
     const studentLevel = studentSkillMap.get(sk.name.toLowerCase()) || 'None';
     const isMissingOrBeginner = studentLevel === 'None' || studentLevel === 'Beginner';
 
-    // Count how many peer mentors teach this skill
     const availableMentors = students.filter(
       (st) =>
         st.id !== currentUser.id &&
         st.skillsToTeach.some((teach) => teach.skillName.toLowerCase() === sk.name.toLowerCase() && teach.isAvailable)
     );
 
-    // Count recruiter demand
-    const hiringCompanies = companies.filter((c) =>
-      c.requiredSkills.some((req) => req.toLowerCase() === sk.name.toLowerCase())
-    );
-
     return {
       skill: sk,
       studentLevel,
       isMissingOrBeginner,
-      availableMentorsCount: availableMentors.length,
-      hiringCompaniesCount: hiringCompanies.length,
-      companiesList: hiringCompanies.map((c) => c.name)
+      availableMentorsCount: availableMentors.length
     };
   });
 
-  // Sort by missing skills first, then by recruiter demand
   const prioritizedSkills = skillGapItems
     .sort((a, b) => {
       if (a.isMissingOrBeginner && !b.isMissingOrBeginner) return -1;
       if (!a.isMissingOrBeginner && b.isMissingOrBeginner) return 1;
-      return b.hiringCompaniesCount - a.hiringCompaniesCount;
+      return b.availableMentorsCount - a.availableMentorsCount;
     })
     .slice(0, 4);
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs p-6 space-y-5">
+    <div className="bg-white rounded-3xl border border-slate-200 shadow-2xs p-6 space-y-5">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-100">
         <div>
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-700 border border-amber-200 flex items-center justify-center">
-              <Sparkles className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-900 border border-amber-300 flex items-center justify-center font-bold">
+              <Sparkles className="w-4 h-4 text-amber-700" />
             </div>
             <h2 className="text-base font-bold text-slate-900 tracking-tight">
-              Skill Gap Analysis & Recommendations
+              Skill Gap Intelligence & Learning Recommendations
             </h2>
           </div>
           <p className="text-xs text-slate-500 mt-1">
-            Personalized for your target domain ({targetDomain}) and upcoming campus drives.
+            Personalized for your target domain ({targetDomain}) based on IMT Hyderabad recruiters.
           </p>
         </div>
 
         <button
           type="button"
-          onClick={() => setActiveTab('domains')}
-          className="text-xs font-semibold text-[#8B1E2D] hover:underline flex items-center gap-1 self-start sm:self-auto"
+          onClick={() => setActiveTab('placements')}
+          className="text-xs font-bold text-blue-900 hover:text-amber-600 inline-flex items-center gap-1 self-start sm:self-auto"
         >
-          <Compass className="w-3.5 h-3.5" />
-          Explore Domain Matrix →
+          <span>View 226 Placement JDs</span>
+          <ArrowRight className="w-3.5 h-3.5" />
         </button>
       </div>
 
-      {/* Recommended skills grid */}
+      {/* Grid of Skill Gaps */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-        {prioritizedSkills.map(({ skill, studentLevel, isMissingOrBeginner, availableMentorsCount, hiringCompaniesCount, companiesList }) => (
+        {prioritizedSkills.map(({ skill, studentLevel, isMissingOrBeginner, availableMentorsCount }) => (
           <div
             key={skill.id}
-            className={`p-4 rounded-xl border transition-all flex flex-col justify-between ${
+            className={`p-4 rounded-2xl border transition-all flex flex-col justify-between space-y-3 ${
               isMissingOrBeginner
-                ? 'bg-gradient-to-br from-amber-50/40 to-white border-amber-200 shadow-2xs hover:border-amber-300'
-                : 'bg-white border-slate-200 hover:border-slate-300'
+                ? 'bg-amber-50/40 border-amber-200/90'
+                : 'bg-slate-50/70 border-slate-200/80'
             }`}
           >
-            <div>
-              <div className="flex items-start justify-between gap-2 mb-2">
+            <div className="space-y-2">
+              <div className="flex items-start justify-between gap-2">
                 <div>
-                  <h3 className="text-xs sm:text-sm font-bold text-slate-900 leading-tight">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    {skill.domain}
+                  </span>
+                  <h3 className="text-sm font-extrabold text-slate-900 mt-0.5">
                     {skill.name}
                   </h3>
-                  <div className="text-[11px] text-slate-500 mt-0.5">
-                    {skill.domain} • {skill.category}
-                  </div>
                 </div>
 
-                <Badge
-                  variant={isMissingOrBeginner ? 'priority' : 'proficiency'}
-                  level={isMissingOrBeginner ? 'High' : (studentLevel as any)}
-                  size="xs"
+                <span
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                    isMissingOrBeginner
+                      ? 'bg-amber-100 text-amber-900 border-amber-300'
+                      : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                  }`}
                 >
-                  {isMissingOrBeginner ? 'High Priority Gap' : `Your Level: ${studentLevel}`}
-                </Badge>
+                  {isMissingOrBeginner ? 'Skill Gap' : 'Acquired'}
+                </span>
               </div>
 
-              <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed mb-3">
+              <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
                 {skill.description}
               </p>
-
-              {/* Demand badges */}
-              <div className="space-y-1.5 mb-3 text-[11px]">
-                {hiringCompaniesCount > 0 && (
-                  <div className="flex items-center gap-1.5 text-slate-700">
-                    <Building2 className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                    <span className="font-semibold">{hiringCompaniesCount} Campus Recruiters</span>
-                    <span className="text-slate-400">({companiesList.slice(0, 2).join(', ')})</span>
-                  </div>
-                )}
-
-                <div className="flex items-center gap-1.5 text-slate-700">
-                  <Users className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                  <span className="font-semibold text-emerald-800">
-                    {availableMentorsCount} Peer Mentor{availableMentorsCount !== 1 ? 's' : ''} available on campus
-                  </span>
-                </div>
-              </div>
             </div>
 
-            {/* Action CTA */}
-            <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-              <span className="text-[10px] text-slate-400">
-                {isMissingOrBeginner ? 'Bridge this gap before drives' : 'Proficiency logged'}
-              </span>
+            <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-xs text-slate-600">
+                <Users className="w-3.5 h-3.5 text-blue-900 shrink-0" />
+                <span className="font-semibold text-slate-800">{availableMentorsCount}</span>
+                <span className="text-slate-500">peers teach this</span>
+              </div>
 
               <button
                 type="button"
@@ -173,9 +142,9 @@ export const SkillGapCard: React.FC<SkillGapCardProps> = ({
                   setSelectedSkillForMentorSearch(skill.name);
                   setActiveTab('find_mentor');
                 }}
-                className="text-xs font-bold text-[#8B1E2D] hover:text-[#721522] hover:underline inline-flex items-center gap-1"
+                className="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-900 bg-amber-400 hover:bg-amber-500 transition-colors shadow-2xs flex items-center gap-1"
               >
-                Find a Mentor
+                <span>Find Mentor</span>
                 <ArrowRight className="w-3 h-3" />
               </button>
             </div>

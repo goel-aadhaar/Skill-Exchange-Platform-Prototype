@@ -29,7 +29,7 @@ export const StatCards: React.FC<StatCardsProps> = ({ currentUser, requests }) =
   const activeRequestsCount = requests.filter(
     (r) =>
       (r.mentorId === currentUser.id || r.requesterId === currentUser.id) &&
-      (r.status === 'Pending' || r.status === 'Accepted' || r.status === 'Active')
+      (r.status.toUpperCase() === 'PENDING' || r.status.toUpperCase() === 'ACCEPTED' || r.status.toUpperCase() === 'ACTIVE')
   ).length;
 
   const completedSessionsCount = currentUser.sessionsCompleted;
@@ -40,9 +40,9 @@ export const StatCards: React.FC<StatCardsProps> = ({ currentUser, requests }) =
       value: skillsToTeachCount,
       subtext: `${verifiedSkillsCount} verified by placement cell`,
       icon: BookMarked,
-      iconColor: 'text-[#8B1E2D]',
-      bgColor: 'bg-rose-50/50',
-      borderColor: 'border-rose-100',
+      iconColor: 'text-[#0F2942]',
+      bgColor: 'bg-blue-50/50',
+      borderColor: 'border-blue-100',
       tab: 'my_skills' as const
     },
     {
@@ -60,9 +60,9 @@ export const StatCards: React.FC<StatCardsProps> = ({ currentUser, requests }) =
       value: activeRequestsCount,
       subtext: 'Incoming & outgoing bookings',
       icon: ArrowLeftRight,
-      iconColor: 'text-sky-700',
-      bgColor: 'bg-sky-50/50',
-      borderColor: 'border-sky-100',
+      iconColor: 'text-blue-700',
+      bgColor: 'bg-blue-50/40',
+      borderColor: 'border-blue-100',
       tab: 'my_requests' as const
     },
     {
@@ -81,8 +81,8 @@ export const StatCards: React.FC<StatCardsProps> = ({ currentUser, requests }) =
       subtext: `Based on ${currentUser.ratingsCount} peer reviews`,
       icon: Star,
       iconColor: 'text-amber-500',
-      bgColor: 'bg-amber-50/30',
-      borderColor: 'border-amber-200/60',
+      bgColor: 'bg-amber-50/40',
+      borderColor: 'border-amber-200/80',
       tab: 'profile' as const
     }
   ];
@@ -96,22 +96,23 @@ export const StatCards: React.FC<StatCardsProps> = ({ currentUser, requests }) =
             key={idx}
             type="button"
             onClick={() => setActiveTab(card.tab)}
-            className={`p-4 rounded-xl border ${card.borderColor} ${card.bgColor} bg-white shadow-2xs hover:shadow-sm hover:border-slate-300 transition-all text-left flex flex-col justify-between group`}
+            className={`p-4 rounded-2xl border ${card.borderColor} ${card.bgColor} bg-white shadow-2xs hover:shadow-md hover:border-amber-300 transition-all text-left flex flex-col justify-between group`}
           >
-            <div className="flex items-center justify-between w-full mb-2">
-              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider line-clamp-1">
-                {card.title}
-              </span>
-              <Icon className={`w-4 h-4 ${card.iconColor} shrink-0`} />
-            </div>
-
             <div>
-              <div className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider line-clamp-1">
+                  {card.title}
+                </span>
+                <Icon className={`w-4 h-4 ${card.iconColor} shrink-0`} />
+              </div>
+              <div className="text-2xl font-black text-slate-900 tracking-tight">
                 {card.value}
               </div>
-              <div className="text-[10px] sm:text-[11px] text-slate-500 mt-1 line-clamp-1">
-                {card.subtext}
-              </div>
+            </div>
+
+            <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
+              <span className="line-clamp-1">{card.subtext}</span>
+              <ChevronRight className="w-3 h-3 text-slate-400 group-hover:text-amber-600 group-hover:translate-x-0.5 transition-transform shrink-0" />
             </div>
           </button>
         );

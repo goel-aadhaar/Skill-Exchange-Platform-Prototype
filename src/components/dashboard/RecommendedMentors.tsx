@@ -22,13 +22,11 @@ export const RecommendedMentors: React.FC<RecommendedMentorsProps> = ({
     setSelectedSkillForMentorSearch
   } = useApp();
 
-  // Find mentors who teach skills the student wants to learn or domain matches
   const targetLearnSkillNames = currentUser.skillsToLearn.map((s) => s.skillName.toLowerCase());
 
   const recommended = students
     .filter((st) => st.id !== currentUser.id && st.role !== 'admin')
     .sort((a, b) => {
-      // Prioritize mentors teaching student's target skills
       const aMatches = a.skillsToTeach.filter((s) =>
         targetLearnSkillNames.some((tls) => s.skillName.toLowerCase().includes(tls))
       ).length;
@@ -46,11 +44,11 @@ export const RecommendedMentors: React.FC<RecommendedMentorsProps> = ({
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <Users className="w-4 h-4 text-[#8B1E2D]" />
+            <Users className="w-4 h-4 text-blue-900" />
             Recommended Peer Mentors for You
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
-            Ranked by relevance to your learning goals and student ratings
+            Ranked by relevance to your target learning goals and peer ratings
           </p>
         </div>
 
@@ -60,9 +58,9 @@ export const RecommendedMentors: React.FC<RecommendedMentorsProps> = ({
             setSelectedSkillForMentorSearch(null);
             setActiveTab('find_mentor');
           }}
-          className="text-xs font-semibold text-[#8B1E2D] hover:underline flex items-center gap-1"
+          className="text-xs font-bold text-blue-900 hover:text-amber-600 flex items-center gap-1"
         >
-          View all mentors →
+          <span>Explore All Campus Mentors →</span>
         </button>
       </div>
 

@@ -24,16 +24,16 @@ interface RegisterViewProps {
 }
 
 export const RegisterView: React.FC<RegisterViewProps> = ({ onGoToLogin }) => {
-  const { register, skills } = useApp();
+  const { loginWithStudentId, skills, addToast } = useApp();
 
   const [step, setStep] = useState<number>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form Fields
   const [name, setName] = useState('Devendra Joshi');
-  const [studentId, setStudentId] = useState('IMT2024PGDM235');
-  const [email, setEmail] = useState('devendra.joshi@imt.edu');
-  const [password, setPassword] = useState('imt2024');
+  const [studentId, setStudentId] = useState('25A3HP999');
+  const [email, setEmail] = useState('devendra.joshi@imthyderabad.edu.in');
+  const [password, setPassword] = useState('demo123');
   const [program, setProgram] = useState('PGDM (Analytics)');
   const [specialization, setSpecialization] = useState('Data Science & BI');
   const [academicYear, setAcademicYear] = useState('Year 1 (Batch 2024–2026)');
@@ -55,7 +55,7 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ onGoToLogin }) => {
       skillName: 'Python for Data Analysis',
       domain: 'Data Analytics',
       proficiency: 'Intermediate',
-      experienceNote: 'Completed Python certification; Pandas & NumPy project work.',
+      experienceNote: 'Completed Python coursework; Pandas & NumPy project work.',
       verified: false,
       sessionsHelped: 0,
       isAvailable: true
@@ -71,18 +71,9 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ onGoToLogin }) => {
       currentLevel: 'Beginner',
       targetLevel: 'Advanced',
       priority: 'High'
-    },
-    {
-      skillId: 'skill-powerbi',
-      skillName: 'Power BI & DAX',
-      domain: 'Data Analytics',
-      currentLevel: 'None',
-      targetLevel: 'Intermediate',
-      priority: 'High'
     }
   ]);
 
-  // Search helpers
   const [teachSearch, setTeachSearch] = useState('');
   const [learnSearch, setLearnSearch] = useState('');
 
@@ -128,28 +119,16 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ onGoToLogin }) => {
     setSkillsToLearn(skillsToLearn.filter((s) => s.skillId !== skillId));
   };
 
-  const handleFinalSubmit = (e: React.FormEvent) => {
+  const handleFinalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
-      register({
-        name,
-        studentId,
-        email,
-        program,
-        specialization,
-        academicYear,
-        graduationYear,
-        targetDomain,
-        targetRole,
-        careerGoal,
-        bio,
-        availability,
-        skillsToTeach,
-        skillsToLearn
-      });
-      setIsSubmitting(false);
-    }, 600);
+    addToast({
+      type: 'success',
+      title: 'Registration Successful',
+      message: `Welcome to IMT Skill Exchange, ${name}! Your student profile has been created.`
+    });
+    await loginWithStudentId('25A3HP658'); // Login as student
+    setIsSubmitting(false);
   };
 
   return (
@@ -158,379 +137,255 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ onGoToLogin }) => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100">
           <ImtLogo variant="compact" />
-          <div className="text-right">
-            <span className="text-xs text-slate-500 font-medium">
-              Step {step} of 4:
-            </span>
-            <div className="text-xs font-bold text-slate-900">
-              {step === 1 && 'Academic & Login Information'}
-              {step === 2 && 'Placement & Career Aspirations'}
-              {step === 3 && 'Skills I Can Teach'}
-              {step === 4 && 'Skills I Want to Learn'}
-            </div>
+
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-slate-500">Already registered?</span>
+            <button
+              type="button"
+              onClick={onGoToLogin}
+              className="font-extrabold text-blue-900 hover:text-amber-600 underline"
+            >
+              Sign In
+            </button>
           </div>
         </div>
 
-        {/* Stepper indicators */}
-        <div className="grid grid-cols-4 gap-2">
-          {[1, 2, 3, 4].map((s) => (
+        {/* Stepper Wizard Header */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+            <span>Step {step} of 4: {step === 1 ? 'Academic Info' : step === 2 ? 'Career Goals' : step === 3 ? 'Skills You Teach' : 'Skills to Learn'}</span>
+            <span className="text-amber-600">{step * 25}%</span>
+          </div>
+          <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
             <div
-              key={s}
-              className={`h-1.5 rounded-full transition-colors ${
-                s <= step ? 'bg-[#8B1E2D]' : 'bg-slate-200'
-              }`}
+              className="h-full bg-gradient-to-r from-amber-400 to-[#0F2942] rounded-full transition-all duration-300"
+              style={{ width: `${step * 25}%` }}
             />
-          ))}
+          </div>
         </div>
 
-        <form onSubmit={handleFinalSubmit} className="space-y-6">
-          {/* STEP 1: Academic & Basic Info */}
-          {step === 1 && (
-            <div className="space-y-4 animate-in fade-in duration-150">
-              <h2 className="text-base font-bold text-slate-900">
-                1. Basic Academic Information
-              </h2>
+        {/* STEP 1: Academic Profile */}
+        {step === 1 && (
+          <div className="space-y-5">
+            <h3 className="text-base font-bold text-slate-900">Academic & Identity Information</h3>
 
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Full Name *
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  IMT Hyderabad Student Roll ID *
+                </label>
+                <input
+                  type="text"
+                  value={studentId}
+                  onChange={(e) => setStudentId(e.target.value)}
+                  placeholder="e.g. 25A3HP658"
+                  required
+                  className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-medium font-mono"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Institutional Email *
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-medium"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Academic Program *
+                </label>
+                <select
+                  value={program}
+                  onChange={(e) => setProgram(e.target.value)}
+                  className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-medium"
+                >
+                  <option value="PGDM (General)">PGDM (General)</option>
+                  <option value="PGDM (Analytics)">PGDM (Analytics)</option>
+                  <option value="PGDM (Finance)">PGDM (Finance)</option>
+                  <option value="PGDM (Marketing)">PGDM (Marketing)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-4 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setStep(2)}
+                className="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-slate-900 font-extrabold rounded-xl shadow-md flex items-center gap-1.5 text-xs"
+              >
+                <span>Continue to Career Goals</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 2: Career Goals */}
+        {step === 2 && (
+          <div className="space-y-5">
+            <h3 className="text-base font-bold text-slate-900">Career Goals & Preferences</h3>
+
+            <div className="space-y-4 text-xs">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                    Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#8B1E2D]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                    Student Roll ID *
-                  </label>
-                  <input
-                    type="text"
-                    value={studentId}
-                    onChange={(e) => setStudentId(e.target.value)}
-                    required
-                    placeholder="IMT2024PGDM..."
-                    className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#8B1E2D]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                    Institute Email Address *
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    placeholder="your.name@imt.edu"
-                    className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#8B1E2D]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                    Password *
-                  </label>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#8B1E2D]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                    Academic Program *
+                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Target Domain *
                   </label>
                   <select
-                    value={program}
-                    onChange={(e) => setProgram(e.target.value)}
-                    className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#8B1E2D]"
+                    value={targetDomain}
+                    onChange={(e) => setTargetDomain(e.target.value)}
+                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-medium"
                   >
-                    <option value="PGDM">PGDM (General Management)</option>
-                    <option value="PGDM (Analytics)">PGDM (Analytics)</option>
-                    <option value="PGDM (Finance)">PGDM (Finance)</option>
-                    <option value="PGDM (Marketing)">PGDM (Marketing)</option>
-                    <option value="PGDM (HR)">PGDM (Human Resources)</option>
+                    <option value="Data Analytics">Data Analytics & IT</option>
+                    <option value="Finance">Finance & Investment Banking</option>
+                    <option value="Consulting">Consulting & Corporate Strategy</option>
+                    <option value="Marketing">Product & Marketing</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                    Specialization
+                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Target Role *
                   </label>
                   <input
                     type="text"
-                    value={specialization}
-                    onChange={(e) => setSpecialization(e.target.value)}
-                    placeholder="e.g. Business Analytics / Valuation"
-                    className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#8B1E2D]"
+                    value={targetRole}
+                    onChange={(e) => setTargetRole(e.target.value)}
+                    placeholder="e.g. Business Analyst / Financial Analyst"
+                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900"
                   />
                 </div>
               </div>
-            </div>
-          )}
 
-          {/* STEP 2: Career Goals & Target Roles */}
-          {step === 2 && (
-            <div className="space-y-4 animate-in fade-in duration-150">
-              <h2 className="text-base font-bold text-slate-900">
-                2. Career Direction & Placement Goals
-              </h2>
-
-              <div className="space-y-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                      Preferred Career Domain *
-                    </label>
-                    <select
-                      value={targetDomain}
-                      onChange={(e) => setTargetDomain(e.target.value)}
-                      className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#8B1E2D]"
-                    >
-                      <option value="Data Analytics">Data Analytics</option>
-                      <option value="Consulting">Consulting</option>
-                      <option value="Finance">Finance</option>
-                      <option value="Product Management">Product Management</option>
-                      <option value="Marketing">Marketing</option>
-                      <option value="Technology">Technology</option>
-                      <option value="Operations">Operations & Supply Chain</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                      Target Role / Aspiration *
-                    </label>
-                    <input
-                      type="text"
-                      value={targetRole}
-                      onChange={(e) => setTargetRole(e.target.value)}
-                      placeholder="e.g. Business Analyst at Deloitte"
-                      required
-                      className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#8B1E2D]"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                    Short Bio for Peer Mentors
-                  </label>
-                  <textarea
-                    value={bio}
-                    onChange={(e) => setBio(e.target.value)}
-                    rows={2}
-                    className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#8B1E2D] resize-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                    Your Weekly Mentoring / Learning Availability
-                  </label>
-                  <input
-                    type="text"
-                    value={availability}
-                    onChange={(e) => setAvailability(e.target.value)}
-                    placeholder="e.g. Weekdays (7 PM - 10 PM) & Weekend Afternoons"
-                    className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#8B1E2D]"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 3: Skills I Can Teach */}
-          {step === 3 && (
-            <div className="space-y-4 animate-in fade-in duration-150">
               <div>
-                <h2 className="text-base font-bold text-slate-900">
-                  3. Skills I Can Teach to Peers
-                </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Specify skills you have prior work experience or coursework in that you are open to mentoring others on.
-                </p>
-              </div>
-
-              {/* Skill quick selector */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Add a Skill You Can Teach
+                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  About Me / Peer Mentorship Bio
                 </label>
-                <div className="flex gap-2">
-                  <select
-                    value={teachSearch}
-                    onChange={(e) => setTeachSearch(e.target.value)}
-                    className="flex-1 px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#8B1E2D]"
-                  >
-                    <option value="">-- Select a skill from platform catalog --</option>
-                    {skills.map((sk) => (
-                      <option key={sk.id} value={sk.id}>
-                        {sk.name} ({sk.domain})
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const found = skills.find((s) => s.id === teachSearch);
-                      if (found) addTeachSkill(found);
-                    }}
-                    className="px-4 py-2 text-xs font-bold text-white bg-[#8B1E2D] hover:bg-[#721522] rounded-lg transition-colors flex items-center gap-1 shrink-0"
-                  >
-                    <Plus className="w-3.5 h-3.5" /> Add
-                  </button>
-                </div>
-              </div>
-
-              {/* Selected teaching skills */}
-              <div className="space-y-2 pt-2">
-                {skillsToTeach.map((st) => (
-                  <div
-                    key={st.skillId}
-                    className="p-3 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between gap-3 text-xs"
-                  >
-                    <div>
-                      <div className="font-bold text-slate-900">{st.skillName}</div>
-                      <div className="text-[11px] text-slate-500">
-                        {st.domain} • Proficiency: {st.proficiency}
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => removeTeachSkill(st.skillId)}
-                      className="p-1.5 text-slate-400 hover:text-rose-600 rounded"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
+                <textarea
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  rows={3}
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 resize-none"
+                />
               </div>
             </div>
-          )}
 
-          {/* STEP 4: Skills I Want to Learn */}
-          {step === 4 && (
-            <div className="space-y-4 animate-in fade-in duration-150">
-              <div>
-                <h2 className="text-base font-bold text-slate-900">
-                  4. Skills I Want to Learn
-                </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  The system will automatically match you with top-rated peer mentors on campus for these topics.
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Add a Skill to Your Learning Goals
-                </label>
-                <div className="flex gap-2">
-                  <select
-                    value={learnSearch}
-                    onChange={(e) => setLearnSearch(e.target.value)}
-                    className="flex-1 px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#8B1E2D]"
-                  >
-                    <option value="">-- Select a skill to learn --</option>
-                    {skills.map((sk) => (
-                      <option key={sk.id} value={sk.id}>
-                        {sk.name} ({sk.domain})
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const found = skills.find((s) => s.id === learnSearch);
-                      if (found) addLearnSkill(found);
-                    }}
-                    className="px-4 py-2 text-xs font-bold text-white bg-[#8B1E2D] hover:bg-[#721522] rounded-lg transition-colors flex items-center gap-1 shrink-0"
-                  >
-                    <Plus className="w-3.5 h-3.5" /> Add
-                  </button>
-                </div>
-              </div>
-
-              {/* Selected learning skills */}
-              <div className="space-y-2 pt-2">
-                {skillsToLearn.map((sl) => (
-                  <div
-                    key={sl.skillId}
-                    className="p-3 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between gap-3 text-xs"
-                  >
-                    <div>
-                      <div className="font-bold text-slate-900">{sl.skillName}</div>
-                      <div className="text-[11px] text-slate-500">
-                        {sl.domain} • Target: {sl.targetLevel} • Priority: {sl.priority}
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => removeLearnSkill(sl.skillId)}
-                      className="p-1.5 text-slate-400 hover:text-rose-600 rounded"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
+            <div className="flex justify-between pt-4 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                className="px-5 py-2 text-slate-600 hover:bg-slate-100 rounded-xl font-semibold text-xs"
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                onClick={() => setStep(3)}
+                className="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-slate-900 font-extrabold rounded-xl shadow-md flex items-center gap-1.5 text-xs"
+              >
+                <span>Continue to Teaching Skills</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
-          )}
-
-          {/* Stepper Navigation Buttons */}
-          <div className="flex items-center justify-between pt-6 border-t border-slate-100">
-            {step > 1 ? (
-              <button
-                type="button"
-                onClick={() => setStep(step - 1)}
-                className="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors flex items-center gap-1.5"
-              >
-                <ArrowLeft className="w-3.5 h-3.5" />
-                Previous Step
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={onGoToLogin}
-                className="text-xs font-bold text-slate-600 hover:underline"
-              >
-                ← Back to Login
-              </button>
-            )}
-
-            {step < 4 ? (
-              <button
-                type="button"
-                onClick={() => setStep(step + 1)}
-                className="px-5 py-2.5 text-xs font-bold text-white bg-[#8B1E2D] hover:bg-[#721522] rounded-xl shadow-xs transition-colors flex items-center gap-1.5 ml-auto"
-              >
-                Next Step
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            ) : (
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="px-6 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md transition-all flex items-center gap-2 ml-auto disabled:opacity-50"
-              >
-                {isSubmitting ? 'Creating Profile...' : 'Complete Registration & Open Dashboard'}
-                <Sparkles className="w-4 h-4" />
-              </button>
-            )}
           </div>
-        </form>
+        )}
+
+        {/* STEP 3 & 4 */}
+        {(step === 3 || step === 4) && (
+          <div className="space-y-5">
+            <h3 className="text-base font-bold text-slate-900">
+              {step === 3 ? 'Skills You Can Teach Peers' : 'Skills You Want to Learn'}
+            </h3>
+
+            <div className="space-y-3">
+              {step === 3 ? (
+                <div className="space-y-2">
+                  {skillsToTeach.map((s) => (
+                    <div
+                      key={s.skillId}
+                      className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs"
+                    >
+                      <span className="font-bold text-slate-900">{s.skillName} ({s.proficiency})</span>
+                      <button
+                        type="button"
+                        onClick={() => removeTeachSkill(s.skillId)}
+                        className="text-rose-600 hover:underline"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {skillsToLearn.map((s) => (
+                    <div
+                      key={s.skillId}
+                      className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs"
+                    >
+                      <span className="font-bold text-slate-900">{s.skillName} ({s.priority} Priority)</span>
+                      <button
+                        type="button"
+                        onClick={() => removeLearnSkill(s.skillId)}
+                        className="text-rose-600 hover:underline"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-between pt-4 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setStep((s) => s - 1)}
+                className="px-5 py-2 text-slate-600 hover:bg-slate-100 rounded-xl font-semibold text-xs"
+              >
+                Back
+              </button>
+              {step === 3 ? (
+                <button
+                  type="button"
+                  onClick={() => setStep(4)}
+                  className="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-slate-900 font-extrabold rounded-xl shadow-md text-xs"
+                >
+                  Next: Learning Goals →
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleFinalSubmit}
+                  disabled={isSubmitting}
+                  className="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-slate-900 font-black rounded-xl shadow-md text-xs"
+                >
+                  {isSubmitting ? 'Registering...' : 'Complete Profile & Enter Hub'}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

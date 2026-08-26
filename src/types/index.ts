@@ -1,6 +1,6 @@
 export type ProficiencyLevel = 'Beginner' | 'Intermediate' | 'Advanced' | 'Expert';
 export type PriorityLevel = 'High' | 'Medium' | 'Low';
-export type RequestStatus = 'Pending' | 'Accepted' | 'Rejected' | 'Active' | 'Completed' | 'Cancelled';
+export type RequestStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED' | 'Pending' | 'Accepted' | 'Rejected' | 'Active' | 'Completed' | 'Cancelled';
 export type UserRole = 'student' | 'admin';
 
 export interface SkillToTeach {
@@ -59,6 +59,34 @@ export interface Skill {
   demandLevel: 'Very High' | 'High' | 'Moderate';
   associatedRoles: string[];
   associatedCompanies: string[];
+}
+
+export interface PlacementJob {
+  id: number;
+  srNo: number;
+  companyName: string;
+  sector: string;
+  role: string;
+  domain: string;
+  ctcOffered: string;
+  fixedPay: string;
+  variablePay: string;
+  location: string;
+  experienceRequirements: string;
+  cgpaCriteria: string;
+  undergraduatePreferredDegree: string;
+  majorMinorRequired: string;
+  skillsRequired: string;
+}
+
+export interface InternshipOpportunity {
+  id: number;
+  companyName: string;
+  noticeDate: string;
+  role: string;
+  stipend: string;
+  locations: string;
+  skillsRequired: string;
 }
 
 export interface CompanyRole {

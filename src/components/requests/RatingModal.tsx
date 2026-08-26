@@ -18,7 +18,7 @@ export const RatingModal: React.FC<RatingModalProps> = ({
   onClose,
   request
 }) => {
-  const { submitRating } = useApp();
+  const { submitRatingReview } = useApp();
 
   const [rating, setRating] = useState<number>(5);
   const [selectedTags, setSelectedTags] = useState<string[]>([
@@ -51,21 +51,23 @@ export const RatingModal: React.FC<RatingModalProps> = ({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (rating < 1) return;
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      submitRating({
-        requestId: request.id,
-        rating,
-        tags: selectedTags,
-        review
-      });
-      setIsSubmitting(false);
+    const success = await submitRatingReview({
+      requestId: request.id,
+      mentorId: request.mentorId,
+      skillName: request.skillName,
+      rating,
+      tags: selectedTags,
+      review
+    });
+    setIsSubmitting(false);
+    if (success) {
       onClose();
-    }, 400);
+    }
   };
 
   return (
@@ -78,50 +80,49 @@ export const RatingModal: React.FC<RatingModalProps> = ({
     >
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Mentor & Topic Info */}
-        <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between">
+        <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
           <div>
             <div className="text-xs font-bold text-slate-900">
               Mentor: {request.mentorName}
             </div>
-            <div className="text-[11px] text-[#8B1E2D] font-semibold mt-0.5">
+            <div className="text-[11px] text-blue-900 font-bold mt-0.5">
               Topic: {request.skillName}
             </div>
           </div>
           <div className="text-[10px] text-slate-500 text-right">
             <span>Conducted on:</span>
-            <div className="font-semibold text-slate-700">{request.preferredDate}</div>
+            <div className="font-semibold text-slate-700">{request.preferredDate || 'Recent'}</div>
           </div>
         </div>
 
         {/* Star Rating selector */}
-        <div className="text-center py-2 bg-white rounded-xl border border-slate-100 p-4">
+        <div className="text-center py-2 bg-white rounded-2xl border border-slate-200 p-4">
           <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
             Overall Session Rating
           </label>
-          <div className="flex justify-center items-center gap-2">
+          <div className="flex justify-center my-2">
             <StarRating
               rating={rating}
               size="lg"
-              interactive={true}
-              onRatingChange={(r) => setRating(r)}
-              showNumber={false}
+              interactive
+              onRatingChange={(newRate: number) => setRating(newRate)}
             />
           </div>
-          <div className="text-xs font-bold text-amber-600 mt-2">
-            {rating === 5 && '★★★★★ Exceptional & Super Helpful'}
-            {rating === 4 && '★★★★☆ Very Good & Actionable'}
-            {rating === 3 && '★★★☆☆ Good & Informative'}
-            {rating === 2 && '★★☆☆☆ Fair'}
-            {rating === 1 && '★☆☆☆☆ Needs Improvement'}
-          </div>
+          <span className="text-xs font-extrabold text-amber-700">
+            {rating === 5 && 'Outstanding session! Highly recommend.'}
+            {rating === 4 && 'Very good session, clear concepts.'}
+            {rating === 3 && 'Good session, met expectations.'}
+            {rating === 2 && 'Fair, could be improved.'}
+            {rating === 1 && 'Needs significant improvement.'}
+          </span>
         </div>
 
         {/* Feedback tags */}
         <div>
-          <label className="block text-xs font-bold text-slate-800 mb-2">
-            What went particularly well? (Select tags)
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            Highlight Strengths (Select all that apply)
           </label>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-2">
             {availableTags.map((tag) => {
               const isSelected = selectedTags.includes(tag);
               return (
@@ -129,14 +130,14 @@ export const RatingModal: React.FC<RatingModalProps> = ({
                   key={tag}
                   type="button"
                   onClick={() => toggleTag(tag)}
-                  className={`text-xs px-2.5 py-1 rounded-lg border transition-colors flex items-center gap-1 ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                     isSelected
-                      ? 'bg-[#8B1E2D] text-white border-[#8B1E2D] font-semibold shadow-2xs'
-                      : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                      ? 'bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs'
+                      : 'bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100'
                   }`}
                 >
-                  {isSelected && <Check className="w-3 h-3 text-white" />}
-                  {tag}
+                  {isSelected && <Check className="w-3 h-3 text-amber-700" />}
+                  <span>{tag}</span>
                 </button>
               );
             })}
@@ -145,41 +146,34 @@ export const RatingModal: React.FC<RatingModalProps> = ({
 
         {/* Written Review */}
         <div>
-          <label className="block text-xs font-bold text-slate-800 mb-1">
-            Detailed Review / Testimonial *
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+            Written Peer Review
           </label>
           <textarea
             value={review}
             onChange={(e) => setReview(e.target.value)}
             rows={3}
             required
-            placeholder="Write a brief note explaining how the mentor helped you..."
-            className="w-full px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#8B1E2D] resize-none"
+            className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:ring-2 focus:ring-amber-500 resize-none leading-relaxed"
           />
         </div>
 
-        {/* Submit */}
+        {/* Action Buttons */}
         <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+            className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-5 py-2 text-xs font-bold text-white bg-[#8B1E2D] hover:bg-[#721522] rounded-lg shadow-xs transition-colors inline-flex items-center gap-1.5 disabled:opacity-50"
+            className="px-5 py-2 text-xs font-extrabold text-slate-900 bg-amber-400 hover:bg-amber-500 rounded-xl shadow-md transition-all flex items-center gap-1.5"
           >
-            {isSubmitting ? (
-              <>Submitting Review...</>
-            ) : (
-              <>
-                <Send className="w-3.5 h-3.5" />
-                Submit Rating & Review
-              </>
-            )}
+            <Send className="w-3.5 h-3.5 text-slate-900" />
+            <span>{isSubmitting ? 'Updating in PostgreSQL...' : 'Submit 5★ Review'}</span>
           </button>
         </div>
       </form>

@@ -24,21 +24,21 @@ export const MyRequestsView: React.FC = () => {
   const [selectedRequestForRating, setSelectedRequestForRating] = useState<MentoringRequest | null>(null);
   const [selectedRequestForWorkspace, setSelectedRequestForWorkspace] = useState<MentoringRequest | null>(null);
 
-  // User-relevant requests
   const userRequests = requests.filter(
     (r) => r.mentorId === currentUser.id || r.requesterId === currentUser.id
   );
 
   const filteredRequests = userRequests.filter((r) => {
+    const status = r.status.toUpperCase();
     if (activeTabFilter === 'received') return r.mentorId === currentUser.id;
     if (activeTabFilter === 'sent') return r.requesterId === currentUser.id;
-    if (activeTabFilter === 'active') return r.status === 'Accepted' || r.status === 'Active';
-    if (activeTabFilter === 'completed') return r.status === 'Completed';
+    if (activeTabFilter === 'active') return status === 'ACCEPTED' || status === 'ACTIVE';
+    if (activeTabFilter === 'completed') return status === 'COMPLETED';
     return true;
   });
 
   const receivedPendingCount = userRequests.filter(
-    (r) => r.mentorId === currentUser.id && r.status === 'Pending'
+    (r) => r.mentorId === currentUser.id && r.status.toUpperCase() === 'PENDING'
   ).length;
 
   return (
@@ -47,7 +47,7 @@ export const MyRequestsView: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-sky-600 text-white flex items-center justify-center font-bold shadow-xs">
+            <div className="w-8 h-8 rounded-xl bg-[#0F2942] text-amber-400 border border-amber-400/40 flex items-center justify-center font-bold shadow-xs">
               <ArrowLeftRight className="w-4 h-4" />
             </div>
             <h1 className="text-xl font-bold text-slate-900 tracking-tight">
@@ -55,14 +55,14 @@ export const MyRequestsView: React.FC = () => {
             </h1>
           </div>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Track incoming requests from peers, schedule confirmed sessions, and review completed interactions.
+            Track incoming requests from peers, schedule confirmed sessions, and review completed interactions in PostgreSQL.
           </p>
         </div>
 
         <button
           type="button"
           onClick={() => setActiveTab('find_mentor')}
-          className="px-4 py-2 text-xs font-bold text-white bg-[#8B1E2D] hover:bg-[#721522] rounded-xl shadow-xs transition-colors flex items-center gap-1.5 self-start sm:self-auto"
+          className="px-4 py-2 text-xs font-extrabold text-slate-900 bg-amber-400 hover:bg-amber-500 rounded-xl shadow-xs transition-colors flex items-center gap-1.5 self-start sm:self-auto"
         >
           <Plus className="w-3.5 h-3.5" />
           Request New Mentoring
@@ -76,7 +76,7 @@ export const MyRequestsView: React.FC = () => {
           onClick={() => setActiveTabFilter('all')}
           className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
             activeTabFilter === 'all'
-              ? 'bg-white text-slate-900 shadow-xs'
+              ? 'bg-[#0F2942] text-amber-400 shadow-xs'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
@@ -88,15 +88,15 @@ export const MyRequestsView: React.FC = () => {
           onClick={() => setActiveTabFilter('received')}
           className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
             activeTabFilter === 'received'
-              ? 'bg-white text-slate-900 shadow-xs'
+              ? 'bg-[#0F2942] text-amber-400 shadow-xs'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
           <Inbox className="w-3 h-3" />
           <span>Received as Mentor</span>
           {receivedPendingCount > 0 && (
-            <span className="bg-[#8B1E2D] text-white text-[9px] font-bold px-1.5 py-0.2 rounded-full">
-              {receivedPendingCount}
+            <span className="bg-amber-500 text-white text-[9px] font-bold px-1.5 py-0.2 rounded-full animate-pulse">
+              {receivedPendingCount} new
             </span>
           )}
         </button>
@@ -106,12 +106,12 @@ export const MyRequestsView: React.FC = () => {
           onClick={() => setActiveTabFilter('sent')}
           className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
             activeTabFilter === 'sent'
-              ? 'bg-white text-slate-900 shadow-xs'
+              ? 'bg-[#0F2942] text-amber-400 shadow-xs'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
           <Send className="w-3 h-3" />
-          <span>Sent Requests</span>
+          <span>Sent by Me</span>
         </button>
 
         <button
@@ -119,12 +119,12 @@ export const MyRequestsView: React.FC = () => {
           onClick={() => setActiveTabFilter('active')}
           className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
             activeTabFilter === 'active'
-              ? 'bg-white text-slate-900 shadow-xs'
+              ? 'bg-[#0F2942] text-amber-400 shadow-xs'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
           <Clock className="w-3 h-3" />
-          <span>Confirmed & Active</span>
+          <span>Active / Scheduled</span>
         </button>
 
         <button
@@ -132,33 +132,38 @@ export const MyRequestsView: React.FC = () => {
           onClick={() => setActiveTabFilter('completed')}
           className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
             activeTabFilter === 'completed'
-              ? 'bg-white text-slate-900 shadow-xs'
+              ? 'bg-[#0F2942] text-amber-400 shadow-xs'
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          <Sparkles className="w-3 h-3" />
-          <span>Completed Sessions</span>
+          <CheckCircle2 className="w-3 h-3" />
+          <span>Completed</span>
         </button>
       </div>
 
       {/* Requests List */}
       {filteredRequests.length === 0 ? (
         <EmptyState
-          icon={ArrowLeftRight}
-          title="No Requests in this Category"
-          description="You don't have any mentoring requests matching this filter right now."
+          title="No requests found"
+          description={
+            activeTabFilter === 'received'
+              ? "You haven't received any mentoring requests from peers yet."
+              : activeTabFilter === 'sent'
+              ? "You haven't sent any mentoring requests yet. Find a mentor to bridge your skill gaps!"
+              : 'No mentoring records match this filter.'
+          }
           actionText="Find a Peer Mentor"
           onAction={() => setActiveTab('find_mentor')}
         />
       ) : (
         <div className="space-y-4">
           {filteredRequests.map((req) => {
-            const existingRating = ratings.find((r) => r.requestId === req.id);
+            const existingReview = ratings.find((r) => r.requestId === req.id);
             return (
               <RequestCard
                 key={req.id}
                 request={req}
-                existingRating={existingRating}
+                existingRating={existingReview}
                 onOpenRatingModal={(r) => setSelectedRequestForRating(r)}
                 onOpenWorkspace={(r) => setSelectedRequestForWorkspace(r)}
               />
@@ -167,24 +172,28 @@ export const MyRequestsView: React.FC = () => {
         </div>
       )}
 
-      {/* Live Session Workspace Modal */}
-      <SessionWorkspaceModal
-        isOpen={!!selectedRequestForWorkspace}
-        onClose={() => setSelectedRequestForWorkspace(null)}
-        request={selectedRequestForWorkspace}
-        onCompleteAndRate={(r) => {
-          completeMentoringSession(r.id);
-          setSelectedRequestForWorkspace(null);
-          setSelectedRequestForRating(r);
-        }}
-      />
-
       {/* Rating & Review Modal */}
-      <RatingModal
-        isOpen={!!selectedRequestForRating}
-        onClose={() => setSelectedRequestForRating(null)}
-        request={selectedRequestForRating}
-      />
+      {selectedRequestForRating && (
+        <RatingModal
+          isOpen={!!selectedRequestForRating}
+          onClose={() => setSelectedRequestForRating(null)}
+          request={selectedRequestForRating}
+        />
+      )}
+
+      {/* Live Workspace Room Modal */}
+      {selectedRequestForWorkspace && (
+        <SessionWorkspaceModal
+          isOpen={!!selectedRequestForWorkspace}
+          onClose={() => setSelectedRequestForWorkspace(null)}
+          request={selectedRequestForWorkspace}
+          onCompleteAndRate={(req) => {
+            completeMentoringSession(req.id);
+            setSelectedRequestForWorkspace(null);
+            setSelectedRequestForRating(req);
+          }}
+        />
+      )}
     </div>
   );
 };
