@@ -25,7 +25,7 @@ export const MentorCard: React.FC<MentorCardProps> = ({
         {/* Header: Avatar, Name, Verified Status */}
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-[#0F2942] text-amber-400 border border-amber-400/30 flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-[#0B192C] text-amber-400 border border-amber-400/30 flex items-center justify-center font-bold text-sm shadow-xs shrink-0 select-none">
               {mentor.avatar}
             </div>
             <div>
@@ -40,7 +40,7 @@ export const MentorCard: React.FC<MentorCardProps> = ({
                 )}
               </div>
               <p className="text-xs text-slate-500 mt-0.5">
-                {mentor.program} • <span className="font-mono text-[11px] text-blue-900 font-semibold">{mentor.studentId}</span>
+                {mentor.program} • <span className="font-data text-[11px] text-blue-900 font-bold">{mentor.studentId}</span>
               </p>
             </div>
           </div>
@@ -48,7 +48,7 @@ export const MentorCard: React.FC<MentorCardProps> = ({
           {/* Rating */}
           <div className="text-right shrink-0">
             <StarRating rating={mentor.rating} size="xs" ratingsCount={mentor.ratingsCount} />
-            <div className="text-[10px] text-slate-500 mt-0.5 font-medium">
+            <div className="text-[10px] text-slate-500 mt-0.5 font-medium font-data">
               {mentor.sessionsCompleted} sessions helped
             </div>
           </div>
@@ -87,7 +87,7 @@ export const MentorCard: React.FC<MentorCardProps> = ({
               );
             })}
             {mentor.skillsToTeach.length > 3 && (
-              <span className="text-[10px] text-slate-500 self-center px-1">
+              <span className="text-[10px] text-slate-500 self-center px-1 font-data">
                 +{mentor.skillsToTeach.length - 3} more
               </span>
             )}
@@ -106,7 +106,7 @@ export const MentorCard: React.FC<MentorCardProps> = ({
         <button
           type="button"
           onClick={() => onViewProfile(mentor)}
-          className="flex-1 py-2 px-3 text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors text-center"
+          className="flex-1 py-2 px-3 text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors text-center cursor-pointer"
         >
           View Profile
         </button>
@@ -114,7 +114,7 @@ export const MentorCard: React.FC<MentorCardProps> = ({
         <button
           type="button"
           onClick={() => onRequestMentor(mentor, topTeachingSkills[0]?.skillName)}
-          className="flex-1 py-2 px-3 text-xs font-extrabold text-slate-900 bg-amber-400 hover:bg-amber-500 rounded-xl shadow-xs transition-colors text-center flex items-center justify-center gap-1"
+          className="flex-1 py-2 px-3 text-xs font-black text-[#0B192C] bg-amber-400 hover:bg-amber-500 rounded-xl shadow-xs transition-all text-center flex items-center justify-center gap-1 cursor-pointer active:scale-95"
         >
           <span>Request Mentoring</span>
           <ArrowRight className="w-3 h-3" />

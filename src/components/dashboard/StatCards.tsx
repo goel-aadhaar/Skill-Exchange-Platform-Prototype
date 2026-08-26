@@ -36,53 +36,53 @@ export const StatCards: React.FC<StatCardsProps> = ({ currentUser, requests }) =
 
   const cards = [
     {
-      title: 'Skills I Can Teach',
+      title: 'Teaching Portfolio',
       value: skillsToTeachCount,
       subtext: `${verifiedSkillsCount} verified by placement cell`,
       icon: BookMarked,
-      iconColor: 'text-[#0F2942]',
-      bgColor: 'bg-blue-50/50',
-      borderColor: 'border-blue-100',
+      iconColor: 'text-[#0B192C]',
+      bgColor: 'bg-white',
+      accentColor: 'border-l-4 border-l-[#0B192C]',
       tab: 'my_skills' as const
     },
     {
-      title: 'Skills I Need to Learn',
+      title: 'Target Learning Goals',
       value: skillsToLearnCount,
-      subtext: `${highPriorityLearnCount} marked high priority`,
+      subtext: `${highPriorityLearnCount} high-priority placement skills`,
       icon: GraduationCap,
-      iconColor: 'text-amber-700',
-      bgColor: 'bg-amber-50/50',
-      borderColor: 'border-amber-100',
+      iconColor: 'text-amber-600',
+      bgColor: 'bg-white',
+      accentColor: 'border-l-4 border-l-amber-500',
       tab: 'my_skills' as const
     },
     {
-      title: 'Active Mentoring Requests',
+      title: 'Active Requests',
       value: activeRequestsCount,
-      subtext: 'Incoming & outgoing bookings',
+      subtext: 'Incoming bookings & pending sessions',
       icon: ArrowLeftRight,
       iconColor: 'text-blue-700',
-      bgColor: 'bg-blue-50/40',
-      borderColor: 'border-blue-100',
+      bgColor: 'bg-white',
+      accentColor: 'border-l-4 border-l-blue-600',
       tab: 'my_requests' as const
     },
     {
       title: 'Completed Sessions',
       value: completedSessionsCount,
-      subtext: 'Peer interactions on campus',
+      subtext: 'Peer interactions conducted',
       icon: Sparkles,
       iconColor: 'text-emerald-700',
-      bgColor: 'bg-emerald-50/50',
-      borderColor: 'border-emerald-100',
+      bgColor: 'bg-white',
+      accentColor: 'border-l-4 border-l-emerald-500',
       tab: 'my_requests' as const
     },
     {
-      title: 'My Peer Rating',
+      title: 'Peer Quality Rating',
       value: `${currentUser.rating.toFixed(1)} ★`,
-      subtext: `Based on ${currentUser.ratingsCount} peer reviews`,
+      subtext: `From ${currentUser.ratingsCount} verified reviews`,
       icon: Star,
       iconColor: 'text-amber-500',
-      bgColor: 'bg-amber-50/40',
-      borderColor: 'border-amber-200/80',
+      bgColor: 'bg-white',
+      accentColor: 'border-l-4 border-l-amber-400',
       tab: 'profile' as const
     }
   ];
@@ -96,7 +96,7 @@ export const StatCards: React.FC<StatCardsProps> = ({ currentUser, requests }) =
             key={idx}
             type="button"
             onClick={() => setActiveTab(card.tab)}
-            className={`p-4 rounded-2xl border ${card.borderColor} ${card.bgColor} bg-white shadow-2xs hover:shadow-md hover:border-amber-300 transition-all text-left flex flex-col justify-between group`}
+            className={`p-4 rounded-2xl border border-slate-200/90 ${card.bgColor} ${card.accentColor} shadow-2xs hover:shadow-md hover:border-slate-300 transition-all duration-200 text-left flex flex-col justify-between group cursor-pointer`}
           >
             <div>
               <div className="flex items-center justify-between mb-2">
@@ -105,14 +105,14 @@ export const StatCards: React.FC<StatCardsProps> = ({ currentUser, requests }) =
                 </span>
                 <Icon className={`w-4 h-4 ${card.iconColor} shrink-0`} />
               </div>
-              <div className="text-2xl font-black text-slate-900 tracking-tight">
+              <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight font-data">
                 {card.value}
               </div>
             </div>
 
-            <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-500">
-              <span className="line-clamp-1">{card.subtext}</span>
-              <ChevronRight className="w-3 h-3 text-slate-400 group-hover:text-amber-600 group-hover:translate-x-0.5 transition-transform shrink-0" />
+            <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+              <span className="line-clamp-1 font-medium">{card.subtext}</span>
+              <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-amber-600 group-hover:translate-x-0.5 transition-transform shrink-0" />
             </div>
           </button>
         );

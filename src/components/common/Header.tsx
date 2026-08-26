@@ -13,8 +13,6 @@ import {
   User,
   Shield,
   Sparkles,
-  BookOpen,
-  Building2,
   Database
 } from 'lucide-react';
 
@@ -33,9 +31,9 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isMobileSidebar
   } = useApp();
 
   return (
-    <header className="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-2xs">
-      {/* Top Gold & Blue Academic Accent Ribbon */}
-      <div className="h-1 bg-gradient-to-r from-[#0F2942] via-amber-400 to-[#1E3A8A]" />
+    <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-2xs">
+      {/* Top Academic Blue & Gold Ribbon */}
+      <div className="h-1 bg-gradient-to-r from-[#0B192C] via-amber-400 to-[#1E3A8A]" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 gap-4">
@@ -71,16 +69,17 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isMobileSidebar
                     }
                   }
                 }}
-                className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all shadow-inner"
+                className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white transition-all shadow-inner font-medium"
               />
             </div>
           </div>
 
           {/* Right: Neon DB live indicator, Demo Switcher, Notification, User Pill */}
-          <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             {/* Database Live Indicator Badge */}
-            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-bold">
-              <Database className="w-3 h-3 text-emerald-600 animate-pulse" />
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-extrabold tracking-wide">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <Database className="w-3 h-3 text-emerald-600" />
               <span>Neon PostgreSQL Live</span>
             </div>
 
@@ -96,7 +95,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isMobileSidebar
             >
               <Bell className="w-4.5 h-4.5" />
               {unreadNotifsCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-amber-500 text-white text-[10px] font-bold flex items-center justify-center border-2 border-white animate-pulse">
+                <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-amber-500 text-slate-900 text-[10px] font-black flex items-center justify-center border-2 border-white animate-pulse">
                   {unreadNotifsCount}
                 </span>
               )}
@@ -105,16 +104,16 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isMobileSidebar
             {/* Profile Avatar Pill */}
             <div
               onClick={() => setActiveTab('profile')}
-              className="flex items-center gap-2 p-1 pl-1.5 rounded-xl hover:bg-slate-100 cursor-pointer transition-colors border border-transparent hover:border-slate-200"
+              className="flex items-center gap-2 p-1 pl-1.5 rounded-2xl hover:bg-slate-100 cursor-pointer transition-colors border border-transparent hover:border-slate-200"
             >
-              <div className="w-8 h-8 rounded-xl bg-[#0F2942] text-amber-400 border border-amber-400/40 flex items-center justify-center font-bold text-xs shadow-2xs">
+              <div className="w-8 h-8 rounded-xl bg-[#0B192C] text-amber-400 border border-amber-400/30 flex items-center justify-center font-bold text-xs shadow-2xs">
                 {currentUser.avatar}
               </div>
               <div className="hidden xl:block text-left">
                 <div className="text-xs font-bold text-slate-900 leading-tight">
                   {currentUser.name}
                 </div>
-                <div className="text-[10px] text-slate-500 font-medium">
+                <div className="text-[10px] text-slate-500 font-medium font-data">
                   {currentUser.studentId || currentUser.program}
                 </div>
               </div>
