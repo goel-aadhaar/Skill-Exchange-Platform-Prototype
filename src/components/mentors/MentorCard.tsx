@@ -2,7 +2,7 @@ import React from 'react';
 import { Student } from '../../types';
 import { Badge } from '../common/Badge';
 import { StarRating } from '../common/StarRating';
-import { UserCheck, Sparkles, Clock, Calendar, ArrowRight } from 'lucide-react';
+import { Clock, ArrowRight } from 'lucide-react';
 
 interface MentorCardProps {
   mentor: Student;
@@ -17,110 +17,81 @@ export const MentorCard: React.FC<MentorCardProps> = ({
   onRequestMentor,
   highlightSkill
 }) => {
-  const topTeachingSkills = mentor.skillsToTeach.slice(0, 3);
+  const highlightSkillObj = highlightSkill
+    ? mentor.skillsToTeach.find(s => s.skillName.toLowerCase().includes(highlightSkill.toLowerCase()))
+    : mentor.skillsToTeach[0];
+    
+  const primarySkill = highlightSkillObj || mentor.skillsToTeach[0];
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-200/90 shadow-2xs hover:shadow-lg hover:border-amber-300 transition-all p-5 flex flex-col justify-between group">
-      <div>
-        {/* Header: Avatar, Name, Verified Status */}
-        <div className="flex items-start justify-between gap-3 mb-3">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-[#0B192C] text-amber-400 border border-amber-400/30 flex items-center justify-center font-bold text-sm shadow-xs shrink-0 select-none">
-              {mentor.avatar}
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <h3 className="text-sm font-extrabold text-slate-900 leading-tight">
-                  {mentor.name}
-                </h3>
-                {mentor.isVerified && (
-                  <Badge variant="verified" size="xs">
+    <div className="bg-white border-b border-slate-200 py-5 last:border-b-0 hover:bg-slate-50 transition-colors">
+      <div className="flex flex-col sm:flex-row gap-4 justify-between">
+        <div className="flex-1">
+          <div className="flex items-center gap-3 mb-1">
+            <h3 className="text-sm font-bold text-slate-900">
+              {mentor.name}
+            </h3>
+            <span className="text-[11px] text-slate-500">• {mentor.program}</span>
+          </div>
+          
+          {primarySkill && (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600 mb-2">
+              <span className="font-semibold text-slate-800">{primarySkill.skillName}</span>
+              <span>{primarySkill.domain}</span>
+              <span className="text-slate-400">•</span>
+              <span>{primarySkill.proficiency}</span>
+              
+              {primarySkill.verified && (
+                <>
+                  <span className="text-slate-400">•</span>
+                  <span className="flex items-center text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1 rounded-sm border border-emerald-200 uppercase tracking-wider">
                     Verified
-                  </Badge>
-                )}
-              </div>
-              <p className="text-xs text-slate-500 mt-0.5">
-                {mentor.program} • <span className="font-data text-[11px] text-blue-900 font-bold">{mentor.studentId}</span>
-              </p>
-            </div>
-          </div>
-
-          {/* Rating */}
-          <div className="text-right shrink-0">
-            <StarRating rating={mentor.rating} size="xs" ratingsCount={mentor.ratingsCount} />
-            <div className="text-[10px] text-slate-500 mt-0.5 font-medium font-data">
-              {mentor.sessionsCompleted} sessions helped
-            </div>
-          </div>
-        </div>
-
-        {/* Bio snippet */}
-        <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed mb-3.5">
-          {mentor.bio}
-        </p>
-
-        {/* Skills I Can Teach */}
-        <div className="space-y-1.5 mb-4">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            Skills They Teach
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {topTeachingSkills.map((st) => {
-              const isMatch = highlightSkill && st.skillName.toLowerCase().includes(highlightSkill.toLowerCase());
-              return (
-                <span
-                  key={st.skillId}
-                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-colors ${
-                    isMatch
-                      ? 'bg-amber-100 text-amber-900 border-amber-300 font-bold shadow-2xs'
-                      : 'bg-slate-50 text-slate-700 border-slate-200'
-                  }`}
-                >
-                  <span>{st.skillName}</span>
-                  <span className="text-[9px] text-slate-400 font-normal">
-                    ({st.proficiency})
                   </span>
-                  {st.verified && (
-                    <span className="flex items-center text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1 rounded-sm border border-emerald-200 uppercase tracking-wider ml-1">
-                      Verified
-                    </span>
-                  )}
-                </span>
-              );
-            })}
-            {mentor.skillsToTeach.length > 3 && (
-              <span className="text-[10px] text-slate-500 self-center px-1 font-data">
-                +{mentor.skillsToTeach.length - 3} more
+                </>
+              )}
+            </div>
+          )}
+
+          <div className="flex items-center gap-3 text-xs text-slate-500 mb-3">
+            <span className="flex items-center gap-1 font-medium text-amber-500">
+              {mentor.rating} ★
+            </span>
+            <span className="text-slate-300">|</span>
+            <span>{mentor.sessionsCompleted} sessions</span>
+            <span className="text-slate-300">|</span>
+            <span className="flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              {mentor.availability}
+            </span>
+          </div>
+
+          <div className="text-[11px] text-slate-500 flex flex-wrap items-center gap-1">
+            <span className="font-semibold text-slate-700">Can teach:</span>
+            {mentor.skillsToTeach.map((s, i) => (
+              <span key={s.skillId}>
+                {s.skillName}{i < mentor.skillsToTeach.length - 1 ? ', ' : ''}
               </span>
-            )}
+            ))}
           </div>
         </div>
 
-        {/* Availability */}
-        <div className="flex items-center gap-1.5 text-[11px] text-slate-500 bg-slate-50 p-2.5 rounded-xl mb-4 border border-slate-100">
-          <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-          <span className="truncate">{mentor.availability}</span>
+        <div className="flex flex-col sm:items-end justify-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => onRequestMentor(mentor, primarySkill?.skillName)}
+            className="text-xs font-bold text-white bg-[#0B192C] hover:bg-blue-900 px-4 py-2 rounded flex items-center justify-center gap-1 transition-colors w-full sm:w-auto"
+          >
+            <span>Request Mentoring</span>
+            <ArrowRight className="w-3 h-3" />
+          </button>
+          <button
+            type="button"
+            onClick={() => onViewProfile(mentor)}
+            className="text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded transition-colors w-full sm:w-auto text-center"
+          >
+            View Profile
+          </button>
         </div>
-      </div>
-
-      {/* Action Footer */}
-      <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
-        <button
-          type="button"
-          onClick={() => onViewProfile(mentor)}
-          className="flex-1 py-2 px-3 text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors text-center cursor-pointer"
-        >
-          View Profile
-        </button>
-
-        <button
-          type="button"
-          onClick={() => onRequestMentor(mentor, topTeachingSkills[0]?.skillName)}
-          className="flex-1 py-2 px-3 text-xs font-black text-[#0B192C] bg-amber-400 hover:bg-amber-500 rounded-xl shadow-xs transition-all text-center flex items-center justify-center gap-1 cursor-pointer active:scale-95"
-        >
-          <span>Request Mentoring</span>
-          <ArrowRight className="w-3 h-3" />
-        </button>
       </div>
     </div>
   );

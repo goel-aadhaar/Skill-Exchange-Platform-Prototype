@@ -64,7 +64,7 @@ export const RecommendedMentors: React.FC<RecommendedMentorsProps> = ({
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="bg-white border border-slate-200 rounded overflow-hidden">
         {recommended.map((mentor) => (
           <MentorCard
             key={mentor.id}
@@ -74,6 +74,11 @@ export const RecommendedMentors: React.FC<RecommendedMentorsProps> = ({
             highlightSkill={targetLearnSkillNames[0] || null}
           />
         ))}
+        {recommended.length === 0 && (
+          <div className="p-8 text-center text-sm text-slate-500">
+            No peer mentors available right now.
+          </div>
+        )}
       </div>
     </div>
   );

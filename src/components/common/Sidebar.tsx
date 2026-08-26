@@ -7,15 +7,13 @@ import {
   LayoutDashboard,
   Users,
   Compass,
-  Building2,
+  Briefcase,
   BookOpen,
   ArrowLeftRight,
   Bell,
   User,
   ShieldCheck,
-  Award,
-  Sparkles,
-  Briefcase
+  Settings
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -38,233 +36,180 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     onClose();
   };
 
-  // Pending requests where user is mentor
   const pendingReceivedCount = requests.filter(
     (r) => r.mentorId === currentUser.id && r.status === 'PENDING'
   ).length;
 
-  // Pending admin verification queue count
   const pendingVerifsCount = verifications.filter((v) => v.status === 'Pending').length;
-
-  const mainNavigation = [
-    {
-      id: 'dashboard' as ActiveTab,
-      label: 'Dashboard',
-      icon: LayoutDashboard,
-      badge: null
-    },
-    {
-      id: 'find_mentor' as ActiveTab,
-      label: 'Find a Peer Mentor',
-      icon: Users,
-      badge: 'Match'
-    },
-    {
-      id: 'placements' as ActiveTab,
-      label: 'Placements & Internships',
-      icon: Briefcase,
-      badge: '226 JDs'
-    },
-    {
-      id: 'domains' as ActiveTab,
-      label: 'Career Tracks & Domains',
-      icon: Compass,
-      badge: null
-    }
-  ];
-
-  const myActivityNavigation = [
-    {
-      id: 'my_skills' as ActiveTab,
-      label: 'My Skills & Goals',
-      icon: BookOpen,
-      badge: null
-    },
-    {
-      id: 'my_requests' as ActiveTab,
-      label: 'Mentorship Requests',
-      icon: ArrowLeftRight,
-      badge: pendingReceivedCount > 0 ? `${pendingReceivedCount} new` : null,
-      badgeType: 'urgent'
-    },
-    {
-      id: 'notifications' as ActiveTab,
-      label: 'Notifications',
-      icon: Bell,
-      badge: unreadNotifsCount > 0 ? `${unreadNotifsCount}` : null,
-      badgeType: 'counter'
-    },
-    {
-      id: 'profile' as ActiveTab,
-      label: 'My Student Profile',
-      icon: User,
-      badge: null
-    }
-  ];
-
-  const adminNavigation = [
-    {
-      id: 'admin_portal' as ActiveTab,
-      label: 'Placement Cell Portal',
-      icon: ShieldCheck,
-      badge: pendingVerifsCount > 0 ? `${pendingVerifsCount} claims` : null,
-      badgeType: 'warning'
-    }
-  ];
 
   return (
     <>
-      {/* Mobile Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-30 lg:hidden"
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-30 lg:hidden"
           onClick={onClose}
         />
       )}
 
-      {/* Sidebar Drawer */}
       <aside
-        className={`fixed lg:sticky top-0 lg:top-16 z-40 lg:z-20 h-screen lg:h-[calc(100vh-4.25rem)] w-68 bg-white border-r border-slate-200 flex flex-col justify-between py-5 px-3 transition-transform duration-200 ease-in-out ${
+        className={`fixed lg:sticky top-0 lg:top-14 z-40 lg:z-20 h-screen lg:h-[calc(100vh-3.5rem)] w-64 bg-slate-50 border-r border-slate-200 flex flex-col justify-between py-4 transition-transform duration-200 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
-        <div className="space-y-6 overflow-y-auto pr-1">
-          {/* Main Navigation Section */}
+        <div className="space-y-6 overflow-y-auto px-3">
+          
           <div className="space-y-1">
-            <div className="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
-              Main Navigation
+            <div className="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+              Home
             </div>
-            {mainNavigation.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => handleNavClick(item.id)}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    isActive
-                      ? 'bg-[#0B192C] text-amber-400 shadow-md font-extrabold'
-                      : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <Icon
-                      className={`w-4 h-4 shrink-0 ${
-                        isActive ? 'text-amber-400' : 'text-slate-500'
-                      }`}
-                    />
-                    <span className="truncate">{item.label}</span>
-                  </div>
-                  {item.badge && (
-                    <span
-                      className={`text-[10px] font-bold px-1.5 py-0.2 rounded-md ${
-                        isActive
-                          ? 'bg-amber-400 text-slate-900'
-                          : 'bg-amber-100 text-amber-900'
-                      }`}
-                    >
-                      {item.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+            <button
+              onClick={() => handleNavClick('dashboard')}
+              className={`w-full flex items-center px-3 py-2 rounded text-xs font-semibold transition-colors ${
+                activeTab === 'dashboard'
+                  ? 'bg-[#0B192C] text-white'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/50'
+              }`}
+            >
+              <LayoutDashboard className={`w-4 h-4 mr-3 shrink-0 ${activeTab === 'dashboard' ? 'text-white' : 'text-slate-400'}`} />
+              Dashboard
+            </button>
           </div>
 
-          {/* Student Activity Section */}
           <div className="space-y-1">
-            <div className="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
-              My Mentorship
+            <div className="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+              Discover
             </div>
-            {myActivityNavigation.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => handleNavClick(item.id)}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                    isActive
-                      ? 'bg-[#0B192C] text-amber-400 shadow-md font-extrabold'
-                      : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <Icon
-                      className={`w-4 h-4 shrink-0 ${
-                        isActive ? 'text-amber-400' : 'text-slate-500'
-                      }`}
-                    />
-                    <span className="truncate">{item.label}</span>
-                  </div>
-                  {item.badge && (
-                    <span
-                      className={`text-[10px] font-bold px-1.5 py-0.2 rounded-md ${
-                        item.badgeType === 'urgent'
-                          ? 'bg-amber-500 text-white animate-pulse'
-                          : isActive
-                          ? 'bg-amber-400 text-slate-900'
-                          : 'bg-blue-100 text-blue-900'
-                      }`}
-                    >
-                      {item.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+            <button
+              onClick={() => handleNavClick('find_mentor')}
+              className={`w-full flex items-center px-3 py-2 rounded text-xs font-semibold transition-colors ${
+                activeTab === 'find_mentor'
+                  ? 'bg-[#0B192C] text-white'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/50'
+              }`}
+            >
+              <Users className={`w-4 h-4 mr-3 shrink-0 ${activeTab === 'find_mentor' ? 'text-white' : 'text-slate-400'}`} />
+              Find a Mentor
+            </button>
+            <button
+              onClick={() => handleNavClick('placements')}
+              className={`w-full flex items-center px-3 py-2 rounded text-xs font-semibold transition-colors ${
+                activeTab === 'placements'
+                  ? 'bg-[#0B192C] text-white'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/50'
+              }`}
+            >
+              <Briefcase className={`w-4 h-4 mr-3 shrink-0 ${activeTab === 'placements' ? 'text-white' : 'text-slate-400'}`} />
+              Placements & Internships
+            </button>
+            <button
+              onClick={() => handleNavClick('domains')}
+              className={`w-full flex items-center px-3 py-2 rounded text-xs font-semibold transition-colors ${
+                activeTab === 'domains'
+                  ? 'bg-[#0B192C] text-white'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/50'
+              }`}
+            >
+              <Compass className={`w-4 h-4 mr-3 shrink-0 ${activeTab === 'domains' ? 'text-white' : 'text-slate-400'}`} />
+              Domains
+            </button>
           </div>
 
-          {/* Admin Section */}
+          <div className="space-y-1">
+            <div className="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+              My Activity
+            </div>
+            <button
+              onClick={() => handleNavClick('my_requests')}
+              className={`w-full flex items-center justify-between px-3 py-2 rounded text-xs font-semibold transition-colors ${
+                activeTab === 'my_requests'
+                  ? 'bg-[#0B192C] text-white'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/50'
+              }`}
+            >
+              <div className="flex items-center">
+                <ArrowLeftRight className={`w-4 h-4 mr-3 shrink-0 ${activeTab === 'my_requests' ? 'text-white' : 'text-slate-400'}`} />
+                My Requests
+              </div>
+              {pendingReceivedCount > 0 && (
+                <span className="bg-amber-100 text-amber-900 text-[10px] px-1.5 py-0.5 rounded font-bold">
+                  {pendingReceivedCount}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => handleNavClick('my_skills')}
+              className={`w-full flex items-center px-3 py-2 rounded text-xs font-semibold transition-colors ${
+                activeTab === 'my_skills'
+                  ? 'bg-[#0B192C] text-white'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/50'
+              }`}
+            >
+              <BookOpen className={`w-4 h-4 mr-3 shrink-0 ${activeTab === 'my_skills' ? 'text-white' : 'text-slate-400'}`} />
+              My Skills
+            </button>
+            <button
+              onClick={() => handleNavClick('notifications')}
+              className={`w-full flex items-center justify-between px-3 py-2 rounded text-xs font-semibold transition-colors ${
+                activeTab === 'notifications'
+                  ? 'bg-[#0B192C] text-white'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/50'
+              }`}
+            >
+              <div className="flex items-center">
+                <Bell className={`w-4 h-4 mr-3 shrink-0 ${activeTab === 'notifications' ? 'text-white' : 'text-slate-400'}`} />
+                Notifications
+              </div>
+              {unreadNotifsCount > 0 && (
+                <span className="bg-amber-500 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">
+                  {unreadNotifsCount}
+                </span>
+              )}
+            </button>
+          </div>
+
+          <div className="space-y-1">
+            <div className="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">
+              Account
+            </div>
+            <button
+              onClick={() => handleNavClick('profile')}
+              className={`w-full flex items-center px-3 py-2 rounded text-xs font-semibold transition-colors ${
+                activeTab === 'profile'
+                  ? 'bg-[#0B192C] text-white'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-200/50'
+              }`}
+            >
+              <User className={`w-4 h-4 mr-3 shrink-0 ${activeTab === 'profile' ? 'text-white' : 'text-slate-400'}`} />
+              Profile
+            </button>
+          </div>
+
           {currentUser.role === 'admin' && (
             <div className="space-y-1">
-              <div className="px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+              <div className="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">
                 Administration
               </div>
-              {adminNavigation.map((item) => {
-                const Icon = item.icon;
-                const isActive = activeTab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => handleNavClick(item.id)}
-                    className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                      isActive
-                        ? 'bg-[#0B192C] text-amber-400 shadow-md font-extrabold'
-                        : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <Icon
-                        className={`w-4 h-4 shrink-0 ${
-                          isActive ? 'text-amber-400' : 'text-slate-500'
-                        }`}
-                      />
-                      <span className="truncate">{item.label}</span>
-                    </div>
-                    {item.badge && (
-                      <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-md bg-amber-500 text-white">
-                        {item.badge}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
+              <button
+                onClick={() => handleNavClick('admin_portal')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded text-xs font-semibold transition-colors ${
+                  activeTab === 'admin_portal'
+                    ? 'bg-emerald-800 text-white'
+                    : 'text-slate-700 hover:text-emerald-900 hover:bg-emerald-50'
+                }`}
+              >
+                <div className="flex items-center">
+                  <ShieldCheck className={`w-4 h-4 mr-3 shrink-0 ${activeTab === 'admin_portal' ? 'text-white' : 'text-emerald-700'}`} />
+                  Placement Cell
+                </div>
+                {pendingVerifsCount > 0 && (
+                  <span className="bg-emerald-100 text-emerald-900 text-[10px] px-1.5 py-0.5 rounded font-bold">
+                    {pendingVerifsCount}
+                  </span>
+                )}
+              </button>
             </div>
           )}
-        </div>
 
-        {/* Footer Academic Card */}
-        <div className="pt-4 border-t border-slate-200">
-          <div className="p-3 rounded-xl bg-gradient-to-br from-blue-50 to-amber-50/50 border border-blue-200/80 space-y-1">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-[#0F2942]">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-              <span>IMT Hyderabad Portal</span>
-            </div>
-            <p className="text-[10px] text-slate-600 leading-snug">
-              226 Placements & 75 Internships backed by Neon PostgreSQL.
-            </p>
-          </div>
         </div>
       </aside>
     </>

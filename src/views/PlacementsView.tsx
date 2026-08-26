@@ -3,30 +3,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useApp } from '../context/AppContext';
 import { PlacementJob, InternshipOpportunity } from '../types';
-import {
-  Briefcase,
-  Search,
-  Building2,
-  MapPin,
-  DollarSign,
-  GraduationCap,
-  Calendar,
-  CheckCircle2,
-  XCircle,
-  Users,
-  Filter,
-  ArrowRight,
-  Sparkles,
-  ChevronLeft,
-  ChevronRight,
-  ExternalLink,
-  BookOpen,
-  Award
-} from 'lucide-react';
-import { Modal } from '../components/common/Modal';
+import { Search, ChevronLeft, ChevronRight, X, Briefcase, Users, ArrowRight } from 'lucide-react';
 
 export const PlacementsView: React.FC = () => {
-  const { currentUser, setActiveTab, setSelectedSkillForMentorSearch } = useApp();
+  const { currentUser, setActiveTab, setSelectedSkillForMentorSearch, students } = useApp();
 
   const [activeSubTab, setActiveSubTab] = useState<'placements' | 'internships'>('placements');
 
@@ -49,8 +29,7 @@ export const PlacementsView: React.FC = () => {
   const [internshipSearch, setInternshipSearch] = useState('');
 
   // Selected Detail Modal
-  const [selectedPlacementJob, setSelectedPlacementJob] = useState<PlacementJob | null>(null);
-  const [selectedInternship, setSelectedInternship] = useState<InternshipOpportunity | null>(null);
+  const [selectedJob, setSelectedJob] = useState<PlacementJob | InternshipOpportunity | null>(null);
 
   const [isLoadingData, setIsLoadingData] = useState(false);
 
@@ -58,24 +37,29 @@ export const PlacementsView: React.FC = () => {
   const fetchPlacements = useCallback(async () => {
     setIsLoadingData(true);
     try {
-      const params = new URLSearchParams({
-        page: placementPage.toString(),
-        limit: '15',
-        search: placementSearch,
-        sector: selectedSector,
-        domain: selectedDomain
-      });
-      const res = await fetch(`/api/placements?${params.toString()}`);
-      if (res.ok) {
-        const data = await res.json();
-        setPlacementJobs(data.jobs || []);
-        setTotalPlacements(data.total || 0);
-        setPlacementTotalPages(data.totalPages || 1);
-        if (data.filters?.sectors) setSectorOptions(data.filters.sectors);
-        if (data.filters?.domains) setDomainOptions(data.filters.domains);
+      const q = new URLSearchParams();
+      q.set('page', placementPage.toString());
+      q.set('limit', '15');
+      if (placementSearch) q.set('search', placementSearch);
+      if (selectedSector !== 'all') q.set('sector', selectedSector);
+      if (selectedDomain !== 'all') q.set('domain', selectedDomain);
+
+      const res = await fetch(`/api/placements?${q.toString()}`);
+      const data = await res.json();
+      if (data.placements) {
+        setPlacementJobs(data.placements);
+        setTotalPlacements(data.total);
+        setPlacementTotalPages(data.totalPages);
+
+        if (sectorOptions.length === 0 && data.sectors) {
+          setSectorOptions(data.sectors);
+        }
+        if (domainOptions.length === 0 && data.domains) {
+          setDomainOptions(data.domains);
+        }
       }
-    } catch (err) {
-      console.error('Error fetching placements:', err);
+    } catch (e) {
+      console.error(e);
     } finally {
       setIsLoadingData(false);
     }
@@ -85,20 +69,20 @@ export const PlacementsView: React.FC = () => {
   const fetchInternships = useCallback(async () => {
     setIsLoadingData(true);
     try {
-      const params = new URLSearchParams({
-        page: internshipPage.toString(),
-        limit: '15',
-        search: internshipSearch
-      });
-      const res = await fetch(`/api/internships?${params.toString()}`);
-      if (res.ok) {
-        const data = await res.json();
-        setInternships(data.internships || []);
-        setTotalInternships(data.total || 0);
-        setInternshipTotalPages(data.totalPages || 1);
+      const q = new URLSearchParams();
+      q.set('page', internshipPage.toString());
+      q.set('limit', '15');
+      if (internshipSearch) q.set('search', internshipSearch);
+
+      const res = await fetch(`/api/internships?${q.toString()}`);
+      const data = await res.json();
+      if (data.internships) {
+        setInternships(data.internships);
+        setTotalInternships(data.total);
+        setInternshipTotalPages(data.totalPages);
       }
-    } catch (err) {
-      console.error('Error fetching internships:', err);
+    } catch (e) {
+      console.error(e);
     } finally {
       setIsLoadingData(false);
     }
@@ -112,610 +96,341 @@ export const PlacementsView: React.FC = () => {
     }
   }, [activeSubTab, fetchPlacements, fetchInternships]);
 
-  // Skill Matching Helper
-  const getSkillMatchBreakdown = (skillsText: string) => {
-    if (!skillsText || skillsText === '-') {
-      return { matched: [], missing: [], score: 50 };
-    }
-
-    const studentKnownSkillNames = currentUser.skillsToTeach.map((s) => s.skillName.toLowerCase());
-
-    // Extract potential skill keywords from text
-    const lowerText = skillsText.toLowerCase();
-    const commonKeywords = [
-      { name: 'Python for Data Analysis', matchTerm: 'python' },
-      { name: 'SQL & Database Querying', matchTerm: 'sql' },
-      { name: 'Power BI & DAX', matchTerm: 'power bi' },
-      { name: 'Tableau Visual Analytics', matchTerm: 'tableau' },
-      { name: 'Advanced Excel & VBA Macros', matchTerm: 'excel' },
-      { name: 'Financial Modeling & 3-Statement Forecast', matchTerm: 'financial model' },
-      { name: 'DCF & Relative Valuation', matchTerm: 'valuation' },
-      { name: 'Case Study Frameworks', matchTerm: 'case' },
-      { name: 'Guesstimates & Market Sizing', matchTerm: 'guesstimate' },
-      { name: 'Product Strategy & Vision', matchTerm: 'product' },
-      { name: 'PRD Writing & User Story Mapping', matchTerm: 'prd' },
-      { name: 'UI/UX Wireframing in Figma', matchTerm: 'figma' },
-      { name: 'Performance Marketing & Digital Analytics', matchTerm: 'marketing' },
-      { name: 'Supply Chain Optimization', matchTerm: 'supply chain' },
-      { name: 'Resume Building & ATS Optimization', matchTerm: 'resume' },
-      { name: 'STAR Technique for Behavioral Rounds', matchTerm: 'communication' }
-    ];
-
-    const presentRequirements: string[] = [];
-    commonKeywords.forEach((k) => {
-      if (lowerText.includes(k.matchTerm)) {
-        presentRequirements.push(k.name);
-      }
-    });
-
-    if (presentRequirements.length === 0) {
-      return { matched: ['General Management Aptitude'], missing: [], score: 75 };
-    }
-
-    const matched = presentRequirements.filter((req) =>
-      studentKnownSkillNames.some((sk) => sk.includes(req.toLowerCase()) || req.toLowerCase().includes(sk))
-    );
-    const missing = presentRequirements.filter((req) => !matched.includes(req));
-    const score = Math.round((matched.length / presentRequirements.length) * 100);
-
-    return { matched, missing, score: Math.max(score, 20) };
+  // UI Helpers
+  const parseSkills = (skillStr: string) => {
+    if (!skillStr) return [];
+    return skillStr.split(',').map(s => s.trim()).filter(Boolean);
   };
 
-  const handleFindPeerMentorForSkill = (skillName: string) => {
-    setSelectedSkillForMentorSearch(skillName);
-    setActiveTab('find_mentor');
+  const hasSkill = (skillName: string) => {
+    const teach = currentUser.skillsToTeach.some(s => s.skillName.toLowerCase() === skillName.toLowerCase());
+    const learnAndHasIt = currentUser.skillsToLearn.some(s => 
+      s.skillName.toLowerCase() === skillName.toLowerCase() && 
+      (s.currentLevel === 'Intermediate' || s.currentLevel === 'Advanced' || s.currentLevel === 'Expert')
+    );
+    return teach || learnAndHasIt;
+  };
+
+  const countMentorsForSkill = (skillName: string) => {
+    return students.filter(st => 
+      st.id !== currentUser.id && 
+      st.role !== 'admin' &&
+      st.skillsToTeach.some(s => s.skillName.toLowerCase() === skillName.toLowerCase())
+    ).length;
+  };
+
+  // Rendering Row Detail Side Panel (or Modal)
+  const renderDetailPanel = () => {
+    if (!selectedJob) return null;
+    
+    const isPlacement = 'ctc' in selectedJob;
+    const reqSkills = parseSkills(selectedJob.requiredSkills);
+    
+    const missingSkills = reqSkills.filter(s => !hasSkill(s));
+    
+    return (
+      <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
+        <div className="bg-white w-full max-w-md h-full flex flex-col shadow-2xl animate-in slide-in-from-right">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+            <h2 className="text-lg font-bold text-slate-900">Opportunity Details</h2>
+            <button onClick={() => setSelectedJob(null)} className="text-slate-400 hover:text-slate-700">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto p-6 space-y-8">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900 mb-1">{selectedJob.role}</h1>
+              <h2 className="text-lg text-slate-600 font-medium">{selectedJob.companyName}</h2>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-y-4 text-sm">
+              <div>
+                <div className="text-slate-500 font-medium mb-0.5">Location</div>
+                <div className="font-semibold text-slate-900">{selectedJob.location || 'Not specified'}</div>
+              </div>
+              {isPlacement && (
+                <div>
+                  <div className="text-slate-500 font-medium mb-0.5">Domain</div>
+                  <div className="font-semibold text-slate-900">{(selectedJob as PlacementJob).domain}</div>
+                </div>
+              )}
+              {isPlacement ? (
+                <div>
+                  <div className="text-slate-500 font-medium mb-0.5">CTC</div>
+                  <div className="font-semibold text-slate-900">{(selectedJob as PlacementJob).ctc || 'Not specified'}</div>
+                </div>
+              ) : (
+                <div>
+                  <div className="text-slate-500 font-medium mb-0.5">Stipend</div>
+                  <div className="font-semibold text-slate-900">{(selectedJob as InternshipOpportunity).stipend || 'Not specified'}</div>
+                </div>
+              )}
+            </div>
+            
+            <hr className="border-slate-100" />
+            
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Required Skills</h3>
+              <div className="space-y-2 text-sm">
+                {reqSkills.length > 0 ? reqSkills.map(s => {
+                  const userHas = hasSkill(s);
+                  return (
+                    <div key={s} className="flex items-center justify-between py-1 border-b border-slate-50 last:border-0">
+                      <span className="font-medium text-slate-700">{s}</span>
+                      {userHas ? (
+                        <span className="text-emerald-600 font-bold">✓</span>
+                      ) : (
+                        <span className="text-rose-600 font-bold">✕</span>
+                      )}
+                    </div>
+                  );
+                }) : (
+                  <div className="text-slate-500 italic">No specific skills listed.</div>
+                )}
+              </div>
+            </div>
+            
+            {missingSkills.length > 0 && (
+              <div className="bg-rose-50 border border-rose-100 rounded p-4">
+                <h3 className="text-xs font-bold text-rose-900 uppercase tracking-wider mb-2">Your Skill Gap</h3>
+                <p className="text-sm text-rose-800 mb-4">
+                  You are missing: <strong>{missingSkills.join(', ')}</strong>
+                </p>
+                
+                <div className="space-y-2">
+                  {missingSkills.map(s => {
+                    const mentorsCount = countMentorsForSkill(s);
+                    if (mentorsCount > 0) {
+                      return (
+                        <div key={s} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2 bg-white rounded border border-rose-100 text-sm">
+                          <span className="text-slate-700 font-medium">{mentorsCount} peers can teach {s}</span>
+                          <button
+                            onClick={() => {
+                              setSelectedJob(null);
+                              setSelectedSkillForMentorSearch(s);
+                              setActiveTab('find_mentor');
+                            }}
+                            className="text-xs font-bold text-white bg-[#0B192C] hover:bg-blue-900 px-3 py-1.5 rounded transition-colors whitespace-nowrap"
+                          >
+                            Find a peer
+                          </button>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })}
+                </div>
+              </div>
+            )}
+            
+            {missingSkills.length === 0 && reqSkills.length > 0 && (
+              <div className="bg-emerald-50 border border-emerald-100 rounded p-4 flex items-start gap-3">
+                <div className="text-emerald-700 font-medium text-sm">
+                  You have the required skills for this role! 
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
-    <div className="space-y-6 pb-12 animate-in fade-in duration-150">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-[#0F2942] text-amber-400 border border-amber-400/40 flex items-center justify-center font-bold shadow-xs">
-              <Briefcase className="w-4 h-4" />
-            </div>
-            <h1 className="text-xl font-bold text-slate-900 tracking-tight">
-              Placements & Summer Internships Directory
-            </h1>
-          </div>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Browse official IMT Hyderabad recruitment repository. Analyze your skill matches and bridge gaps with peer mentors.
-          </p>
-        </div>
-
-        {/* Tab Switcher */}
-        <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 gap-1 self-start sm:self-auto">
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('placements')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-              activeSubTab === 'placements'
-                ? 'bg-[#0F2942] text-amber-400 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <Building2 className="w-3.5 h-3.5" />
-            <span>Final Placements (226 JDs)</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setActiveSubTab('internships')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-              activeSubTab === 'internships'
-                ? 'bg-[#0F2942] text-amber-400 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <GraduationCap className="w-3.5 h-3.5" />
-            <span>Summer Internships (75 SIPs)</span>
-          </button>
-        </div>
+    <div className="space-y-6 pb-12 animate-in fade-in duration-150 max-w-6xl">
+      <div className="border-b border-slate-200 pb-6 pt-2">
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight mb-2">
+          Placements & Internships
+        </h1>
+        <p className="text-sm text-slate-600">
+          Browse actual historical placement data and identify the skills you need to succeed.
+        </p>
       </div>
 
-      {/* PLACEMENTS TAB VIEW */}
+      <div className="flex bg-slate-50 border border-slate-200 rounded p-1 w-full sm:w-auto mb-6">
+        <button
+          onClick={() => { setActiveSubTab('placements'); setPlacementPage(1); }}
+          className={`flex-1 sm:flex-none px-6 py-2 text-sm font-bold rounded transition-colors ${
+            activeSubTab === 'placements' ? 'bg-white shadow-xs text-slate-900 border border-slate-200' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+          }`}
+        >
+          Placements ({totalPlacements || '...'})
+        </button>
+        <button
+          onClick={() => { setActiveSubTab('internships'); setInternshipPage(1); }}
+          className={`flex-1 sm:flex-none px-6 py-2 text-sm font-bold rounded transition-colors ${
+            activeSubTab === 'internships' ? 'bg-white shadow-xs text-slate-900 border border-slate-200' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+          }`}
+        >
+          Internships ({totalInternships || '...'})
+        </button>
+      </div>
+
       {activeSubTab === 'placements' && (
         <div className="space-y-4">
-          {/* Filters and Search Bar */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-3 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
-            <div className="md:col-span-6 relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="relative col-span-1 md:col-span-1">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <Search className="w-4 h-4" />
+              </div>
               <input
                 type="text"
-                placeholder="Search company name, role, or skills (e.g. Deloitte, SQL, Finance)..."
                 value={placementSearch}
-                onChange={(e) => {
-                  setPlacementSearch(e.target.value);
-                  setPlacementPage(1);
-                }}
-                className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white"
+                onChange={(e) => { setPlacementSearch(e.target.value); setPlacementPage(1); }}
+                placeholder="Search company, role, skill..."
+                className="w-full pl-10 pr-4 py-2.5 text-sm bg-white border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-[#0B192C]"
               />
             </div>
-
-            <div className="md:col-span-3">
-              <select
-                value={selectedSector}
-                onChange={(e) => {
-                  setSelectedSector(e.target.value);
-                  setPlacementPage(1);
-                }}
-                className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
-              >
-                <option value="all">All Sectors ({sectorOptions.length})</option>
-                {sectorOptions.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="md:col-span-3">
+            <div>
               <select
                 value={selectedDomain}
-                onChange={(e) => {
-                  setSelectedDomain(e.target.value);
-                  setPlacementPage(1);
-                }}
-                className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                onChange={(e) => { setSelectedDomain(e.target.value); setPlacementPage(1); }}
+                className="w-full px-3 py-2.5 text-sm bg-white border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-[#0B192C]"
               >
-                <option value="all">All Domains ({domainOptions.length})</option>
-                {domainOptions.map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
+                <option value="all">All Domains</option>
+                {domainOptions.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </div>
+            <div>
+              <select
+                value={selectedSector}
+                onChange={(e) => { setSelectedSector(e.target.value); setPlacementPage(1); }}
+                className="w-full px-3 py-2.5 text-sm bg-white border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-[#0B192C]"
+              >
+                <option value="all">All Sectors</option>
+                {sectorOptions.map(s => <option key={s} value={s}>{s}</option>)}
               </select>
             </div>
           </div>
 
-          {/* Placement Results Table / Cards */}
-          {isLoadingData ? (
-            <div className="p-12 text-center text-xs text-slate-500 bg-white rounded-2xl border border-slate-200">
-              <div className="w-6 h-6 border-2 border-[#0F2942] border-t-amber-400 rounded-full animate-spin mx-auto mb-2" />
-              Loading records from Neon PostgreSQL...
-            </div>
-          ) : placementJobs.length === 0 ? (
-            <div className="p-12 text-center text-xs text-slate-500 bg-white rounded-2xl border border-slate-200">
-              No placement records match your search criteria. Try clearing filters.
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {placementJobs.map((job) => {
-                const matchInfo = getSkillMatchBreakdown(job.skillsRequired);
-                return (
-                  <div
-                    key={job.id}
-                    className="bg-white rounded-2xl border border-slate-200 p-4 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between space-y-3"
-                  >
-                    <div className="space-y-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md">
-                            {job.domain || job.sector || 'Management'}
-                          </span>
-                          <h3 className="font-extrabold text-sm text-slate-900 mt-1 line-clamp-1">
-                            {job.companyName}
-                          </h3>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <span className="text-xs font-extrabold text-blue-900 block font-mono">
-                            {job.ctcOffered}
-                          </span>
-                        </div>
-                      </div>
+          <div className="bg-white border border-slate-200 rounded overflow-hidden">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-200 text-[11px] uppercase tracking-wider text-slate-500">
+                  <th className="px-4 py-3 font-semibold">Company</th>
+                  <th className="px-4 py-3 font-semibold">Role</th>
+                  <th className="px-4 py-3 font-semibold hidden sm:table-cell">Domain</th>
+                  <th className="px-4 py-3 font-semibold hidden md:table-cell">Location</th>
+                  <th className="px-4 py-3 font-semibold text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm divide-y divide-slate-100">
+                {isLoadingData && placementJobs.length === 0 ? (
+                  <tr><td colSpan={5} className="px-4 py-8 text-center text-slate-500">Loading directory...</td></tr>
+                ) : placementJobs.map(job => (
+                  <tr key={job.id} className="hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => setSelectedJob(job)}>
+                    <td className="px-4 py-3 align-middle font-medium text-slate-900">{job.companyName}</td>
+                    <td className="px-4 py-3 align-middle">{job.role}</td>
+                    <td className="px-4 py-3 align-middle hidden sm:table-cell text-slate-600">{job.domain}</td>
+                    <td className="px-4 py-3 align-middle hidden md:table-cell text-slate-600">{job.location}</td>
+                    <td className="px-4 py-3 align-middle text-right">
+                      <span className="text-[#0B192C] font-bold text-xs hover:underline">View Details</span>
+                    </td>
+                  </tr>
+                ))}
+                {!isLoadingData && placementJobs.length === 0 && (
+                  <tr><td colSpan={5} className="px-4 py-8 text-center text-slate-500">No placements found.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
 
-                      <div className="text-xs font-semibold text-slate-700 line-clamp-1 flex items-center gap-1.5">
-                        <Briefcase className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span>{job.role}</span>
-                      </div>
-
-                      <div className="text-[11px] text-slate-500 line-clamp-1 flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span>{job.location || 'Pan India'}</span>
-                      </div>
-
-                      {/* Intelligent Skill Match Bar */}
-                      <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5">
-                        <div className="flex items-center justify-between text-[11px]">
-                          <span className="font-bold text-slate-700 flex items-center gap-1">
-                            <Sparkles className="w-3 h-3 text-amber-500" />
-                            Skill Match:
-                          </span>
-                          <span className="font-extrabold text-blue-900">{matchInfo.score}%</span>
-                        </div>
-                        <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                          <div
-                            className="h-full bg-gradient-to-r from-amber-400 to-[#0F2942] rounded-full"
-                            style={{ width: `${matchInfo.score}%` }}
-                          />
-                        </div>
-                        {matchInfo.missing.length > 0 ? (
-                          <div className="text-[10px] text-rose-700 flex items-center justify-between pt-0.5">
-                            <span>Gap: {matchInfo.missing[0]}</span>
-                            <button
-                              type="button"
-                              onClick={() => handleFindPeerMentorForSkill(matchInfo.missing[0])}
-                              className="font-bold text-amber-800 hover:underline inline-flex items-center gap-0.5"
-                            >
-                              Find Mentor →
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="text-[10px] text-emerald-700 font-medium">
-                            ✓ Great alignment with your profile!
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => setSelectedPlacementJob(job)}
-                      className="w-full py-2 px-3 text-xs font-bold text-slate-900 bg-slate-100 hover:bg-amber-100 hover:text-amber-900 rounded-xl transition-colors flex items-center justify-center gap-1.5"
-                    >
-                      <span>View Full JD & Eligibility</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                );
-              })}
+          {/* Pagination */}
+          {placementTotalPages > 1 && (
+            <div className="flex items-center justify-between pt-4">
+              <span className="text-xs text-slate-500">Page {placementPage} of {placementTotalPages}</span>
+              <div className="flex gap-2">
+                <button 
+                  disabled={placementPage === 1}
+                  onClick={() => setPlacementPage(p => Math.max(1, p - 1))}
+                  className="px-3 py-1.5 border border-slate-200 rounded bg-white text-sm disabled:opacity-50"
+                >
+                  Previous
+                </button>
+                <button 
+                  disabled={placementPage === placementTotalPages}
+                  onClick={() => setPlacementPage(p => Math.min(placementTotalPages, p + 1))}
+                  className="px-3 py-1.5 border border-slate-200 rounded bg-white text-sm disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
             </div>
           )}
-
-          {/* Pagination Controls */}
-          <div className="flex items-center justify-between bg-white p-3 rounded-2xl border border-slate-200 text-xs">
-            <span className="text-slate-500">
-              Showing {(placementPage - 1) * 15 + 1} to {Math.min(placementPage * 15, totalPlacements)} of {totalPlacements} records
-            </span>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                disabled={placementPage <= 1}
-                onClick={() => setPlacementPage((p) => Math.max(p - 1, 1))}
-                className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 disabled:opacity-40"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <span className="font-bold text-slate-900">
-                Page {placementPage} of {placementTotalPages}
-              </span>
-              <button
-                type="button"
-                disabled={placementPage >= placementTotalPages}
-                onClick={() => setPlacementPage((p) => Math.min(p + 1, placementTotalPages))}
-                className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 disabled:opacity-40"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
         </div>
       )}
 
-      {/* SUMMER INTERNSHIPS TAB VIEW */}
       {activeSubTab === 'internships' && (
         <div className="space-y-4">
-          {/* Internship Search Bar */}
-          <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs">
-            <div className="relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search internship company, role, or skill requirements..."
-                value={internshipSearch}
-                onChange={(e) => {
-                  setInternshipSearch(e.target.value);
-                  setInternshipPage(1);
-                }}
-                className="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:bg-white"
-              />
+          <div className="relative md:w-1/3">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+              <Search className="w-4 h-4" />
             </div>
+            <input
+              type="text"
+              value={internshipSearch}
+              onChange={(e) => { setInternshipSearch(e.target.value); setInternshipPage(1); }}
+              placeholder="Search company, role..."
+              className="w-full pl-10 pr-4 py-2.5 text-sm bg-white border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-[#0B192C]"
+            />
           </div>
 
-          {/* Internship Cards */}
-          {isLoadingData ? (
-            <div className="p-12 text-center text-xs text-slate-500 bg-white rounded-2xl border border-slate-200">
-              <div className="w-6 h-6 border-2 border-[#0F2942] border-t-amber-400 rounded-full animate-spin mx-auto mb-2" />
-              Loading internship records from Neon PostgreSQL...
-            </div>
-          ) : internships.length === 0 ? (
-            <div className="p-12 text-center text-xs text-slate-500 bg-white rounded-2xl border border-slate-200">
-              No internship opportunities match your search.
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {internships.map((sip) => {
-                const matchInfo = getSkillMatchBreakdown(sip.skillsRequired);
-                return (
-                  <div
-                    key={sip.id}
-                    className="bg-white rounded-2xl border border-slate-200 p-4 shadow-2xs hover:shadow-md transition-all flex flex-col justify-between space-y-3"
-                  >
-                    <div className="space-y-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <span className="text-[10px] font-bold text-blue-900 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md">
-                            Summer Internship
-                          </span>
-                          <h3 className="font-extrabold text-sm text-slate-900 mt-1 line-clamp-1">
-                            {sip.companyName}
-                          </h3>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <span className="text-xs font-extrabold text-emerald-700 block font-mono">
-                            {sip.stipend}
-                          </span>
-                        </div>
-                      </div>
+          <div className="bg-white border border-slate-200 rounded overflow-hidden">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-200 text-[11px] uppercase tracking-wider text-slate-500">
+                  <th className="px-4 py-3 font-semibold">Company</th>
+                  <th className="px-4 py-3 font-semibold">Role</th>
+                  <th className="px-4 py-3 font-semibold hidden md:table-cell">Location</th>
+                  <th className="px-4 py-3 font-semibold text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm divide-y divide-slate-100">
+                {isLoadingData && internships.length === 0 ? (
+                  <tr><td colSpan={4} className="px-4 py-8 text-center text-slate-500">Loading directory...</td></tr>
+                ) : internships.map(job => (
+                  <tr key={job.id} className="hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => setSelectedJob(job)}>
+                    <td className="px-4 py-3 align-middle font-medium text-slate-900">{job.companyName}</td>
+                    <td className="px-4 py-3 align-middle">{job.role}</td>
+                    <td className="px-4 py-3 align-middle hidden md:table-cell text-slate-600">{job.location}</td>
+                    <td className="px-4 py-3 align-middle text-right">
+                      <span className="text-[#0B192C] font-bold text-xs hover:underline">View Details</span>
+                    </td>
+                  </tr>
+                ))}
+                {!isLoadingData && internships.length === 0 && (
+                  <tr><td colSpan={4} className="px-4 py-8 text-center text-slate-500">No internships found.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
 
-                      <div className="text-xs font-semibold text-slate-700 line-clamp-1 flex items-center gap-1.5">
-                        <GraduationCap className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span>{sip.role}</span>
-                      </div>
-
-                      <div className="text-[11px] text-slate-500 line-clamp-1 flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span>{sip.locations || 'Hyderabad'}</span>
-                      </div>
-
-                      {/* Skill match */}
-                      <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1">
-                        <div className="flex items-center justify-between text-[11px]">
-                          <span className="font-bold text-slate-700">Skill Alignment:</span>
-                          <span className="font-extrabold text-blue-900">{matchInfo.score}%</span>
-                        </div>
-                        {matchInfo.missing.length > 0 ? (
-                          <div className="text-[10px] text-rose-700 flex items-center justify-between pt-0.5">
-                            <span>Gap: {matchInfo.missing[0]}</span>
-                            <button
-                              type="button"
-                              onClick={() => handleFindPeerMentorForSkill(matchInfo.missing[0])}
-                              className="font-bold text-amber-800 hover:underline"
-                            >
-                              Bridge Gap →
-                            </button>
-                          </div>
-                        ) : (
-                          <div className="text-[10px] text-emerald-700 font-medium">
-                            ✓ Ready for application
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={() => setSelectedInternship(sip)}
-                      className="w-full py-2 px-3 text-xs font-bold text-slate-900 bg-slate-100 hover:bg-amber-100 hover:text-amber-900 rounded-xl transition-colors flex items-center justify-center gap-1.5"
-                    >
-                      <span>View Full SIP Opportunity</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                );
-              })}
+          {internshipTotalPages > 1 && (
+            <div className="flex items-center justify-between pt-4">
+              <span className="text-xs text-slate-500">Page {internshipPage} of {internshipTotalPages}</span>
+              <div className="flex gap-2">
+                <button 
+                  disabled={internshipPage === 1}
+                  onClick={() => setInternshipPage(p => Math.max(1, p - 1))}
+                  className="px-3 py-1.5 border border-slate-200 rounded bg-white text-sm disabled:opacity-50"
+                >
+                  Previous
+                </button>
+                <button 
+                  disabled={internshipPage === internshipTotalPages}
+                  onClick={() => setInternshipPage(p => Math.min(internshipTotalPages, p + 1))}
+                  className="px-3 py-1.5 border border-slate-200 rounded bg-white text-sm disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
             </div>
           )}
-
-          {/* Pagination Controls */}
-          <div className="flex items-center justify-between bg-white p-3 rounded-2xl border border-slate-200 text-xs">
-            <span className="text-slate-500">
-              Showing {(internshipPage - 1) * 15 + 1} to {Math.min(internshipPage * 15, totalInternships)} of {totalInternships} records
-            </span>
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                disabled={internshipPage <= 1}
-                onClick={() => setInternshipPage((p) => Math.max(p - 1, 1))}
-                className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 disabled:opacity-40"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <span className="font-bold text-slate-900">
-                Page {internshipPage} of {internshipTotalPages}
-              </span>
-              <button
-                type="button"
-                disabled={internshipPage >= internshipTotalPages}
-                onClick={() => setInternshipPage((p) => Math.min(p + 1, internshipTotalPages))}
-                className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 disabled:opacity-40"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
         </div>
       )}
 
-      {/* PLACEMENT JOB DETAIL MODAL */}
-      {selectedPlacementJob && (
-        <Modal
-          isOpen={!!selectedPlacementJob}
-          onClose={() => setSelectedPlacementJob(null)}
-          maxWidth="3xl"
-          title={selectedPlacementJob.companyName}
-          subtitle={`Placement JD #${selectedPlacementJob.srNo} • ${selectedPlacementJob.role}`}
-        >
-          <div className="space-y-5 text-xs">
-            {/* Highlights Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-              <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase block">CTC Offered</span>
-                <span className="font-bold text-blue-900 text-sm">{selectedPlacementJob.ctcOffered}</span>
-              </div>
-              <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase block">Fixed Pay</span>
-                <span className="font-semibold text-slate-800">{selectedPlacementJob.fixedPay || '-'}</span>
-              </div>
-              <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase block">Domain / Sector</span>
-                <span className="font-semibold text-slate-800">{selectedPlacementJob.domain || selectedPlacementJob.sector}</span>
-              </div>
-              <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase block">Location</span>
-                <span className="font-semibold text-slate-800">{selectedPlacementJob.location || 'Pan India'}</span>
-              </div>
-            </div>
-
-            {/* Eligibility Criteria */}
-            <div className="space-y-2">
-              <h4 className="font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                <GraduationCap className="w-4 h-4 text-blue-900" />
-                Eligibility & Academic Criteria
-              </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] bg-slate-50 p-3 rounded-xl border border-slate-200">
-                <div>
-                  <span className="font-bold text-slate-700">CGPA / Cutoff: </span>
-                  <span className="text-slate-600">{selectedPlacementJob.cgpaCriteria || 'As per norms'}</span>
-                </div>
-                <div>
-                  <span className="font-bold text-slate-700">Experience: </span>
-                  <span className="text-slate-600">{selectedPlacementJob.experienceRequirements || 'Fresher'}</span>
-                </div>
-                <div>
-                  <span className="font-bold text-slate-700">Preferred UG: </span>
-                  <span className="text-slate-600">{selectedPlacementJob.undergraduatePreferredDegree || 'Any Graduate'}</span>
-                </div>
-                <div>
-                  <span className="font-bold text-slate-700">Major/Minor: </span>
-                  <span className="text-slate-600">{selectedPlacementJob.majorMinorRequired || 'All specializations'}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Original Skill Requirements */}
-            <div className="space-y-2">
-              <h4 className="font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                <BookOpen className="w-4 h-4 text-amber-600" />
-                Required Skills Set (Source JD)
-              </h4>
-              <div className="p-3 bg-white border border-slate-200 rounded-xl text-slate-700 leading-relaxed whitespace-pre-line">
-                {selectedPlacementJob.skillsRequired || 'General analytical and problem-solving skills.'}
-              </div>
-            </div>
-
-            {/* Student Skill Match & Peer Mentorship Bridge */}
-            {(() => {
-              const match = getSkillMatchBreakdown(selectedPlacementJob.skillsRequired);
-              return (
-                <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-300/80 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-bold text-slate-900 flex items-center gap-1.5">
-                      <Sparkles className="w-4 h-4 text-amber-600" />
-                      Your Personalized Skill Gap Analysis ({currentUser.name})
-                    </h4>
-                    <span className="text-xs font-extrabold text-blue-900 bg-white px-2 py-0.5 rounded border border-blue-200">
-                      {match.score}% Readiness Match
-                    </span>
-                  </div>
-
-                  {match.missing.length > 0 && (
-                    <div className="space-y-2">
-                      <div className="text-[11px] text-slate-700 font-medium">
-                        You have skill gaps for this opportunity. Find an IMT Hyderabad senior peer mentor to prepare:
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {match.missing.map((sk) => (
-                          <button
-                            key={sk}
-                            type="button"
-                            onClick={() => {
-                              setSelectedPlacementJob(null);
-                              handleFindPeerMentorForSkill(sk);
-                            }}
-                            className="px-3 py-1.5 bg-[#0F2942] hover:bg-slate-900 text-amber-400 rounded-lg text-xs font-bold shadow-xs transition-colors flex items-center gap-1.5"
-                          >
-                            <Users className="w-3 h-3" />
-                            <span>Find Mentor for {sk}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
-
-            <div className="flex justify-end pt-2 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={() => setSelectedPlacementJob(null)}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </Modal>
-      )}
-
-      {/* INTERNSHIP DETAIL MODAL */}
-      {selectedInternship && (
-        <Modal
-          isOpen={!!selectedInternship}
-          onClose={() => setSelectedInternship(null)}
-          maxWidth="2xl"
-          title={selectedInternship.companyName}
-          subtitle={`Summer Internship • ${selectedInternship.role}`}
-        >
-          <div className="space-y-4 text-xs">
-            <div className="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
-              <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase block">Stipend</span>
-                <span className="font-bold text-emerald-700 text-sm">{selectedInternship.stipend}</span>
-              </div>
-              <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase block">Location</span>
-                <span className="font-semibold text-slate-800">{selectedInternship.locations || 'Hyderabad'}</span>
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <span className="font-bold text-slate-900 block">Skills Required:</span>
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-slate-700 leading-relaxed">
-                {selectedInternship.skillsRequired}
-              </div>
-            </div>
-
-            {/* Gap Bridge */}
-            {(() => {
-              const match = getSkillMatchBreakdown(selectedInternship.skillsRequired);
-              if (match.missing.length > 0) {
-                return (
-                  <div className="p-3.5 bg-amber-50 rounded-xl border border-amber-300 space-y-2">
-                    <span className="font-bold text-slate-900 block text-xs">
-                      Need preparation in {match.missing[0]}?
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedInternship(null);
-                        handleFindPeerMentorForSkill(match.missing[0]);
-                      }}
-                      className="px-3 py-1.5 bg-[#0F2942] text-amber-400 rounded-lg text-xs font-bold shadow-xs flex items-center gap-1.5"
-                    >
-                      <Users className="w-3 h-3" />
-                      Find a peer who can teach {match.missing[0]} →
-                    </button>
-                  </div>
-                );
-              }
-              return null;
-            })()}
-
-            <div className="flex justify-end pt-2 border-t border-slate-100">
-              <button
-                type="button"
-                onClick={() => setSelectedInternship(null)}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </Modal>
-      )}
+      {renderDetailPanel()}
     </div>
   );
 };

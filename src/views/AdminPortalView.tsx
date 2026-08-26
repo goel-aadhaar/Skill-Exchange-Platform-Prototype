@@ -126,7 +126,7 @@ export const AdminPortalView: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-[#0F2942] text-amber-400 border border-amber-400/40 flex items-center justify-center font-bold shadow-xs">
+            <div className="w-8 h-8 rounded bg-[#0F2942] text-amber-400 border border-amber-400/40 flex items-center justify-center font-bold ">
               <ShieldCheck className="w-4 h-4" />
             </div>
             <h1 className="text-xl font-bold text-slate-900 tracking-tight">
@@ -142,7 +142,7 @@ export const AdminPortalView: React.FC = () => {
           type="button"
           onClick={resetDatabaseData}
           disabled={isLoading}
-          className="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-rose-50 hover:text-rose-700 rounded-xl transition-colors flex items-center gap-1.5 self-start sm:self-auto border border-slate-300"
+          className="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-rose-50 hover:text-rose-700 rounded transition-colors flex items-center gap-1.5 self-start sm:self-auto border border-slate-300"
         >
           <RotateCcw className="w-3.5 h-3.5" />
           <span>Re-seed Database</span>
@@ -150,15 +150,15 @@ export const AdminPortalView: React.FC = () => {
       </div>
 
       {/* Navigation Sub-Tabs */}
-      <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 gap-1 overflow-x-auto">
+      <div className="flex bg-slate-50 p-1 rounded border border-slate-200 gap-1 overflow-x-auto">
         {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setAdminTab(tab.id)}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
+            className={`px-4 py-2 rounded text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${
               adminTab === tab.id
-                ? 'bg-[#0F2942] text-amber-400 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
+                ? 'bg-[#0F2942] text-amber-400 shadow-sm'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
             <tab.icon className="w-3.5 h-3.5" />
@@ -171,56 +171,56 @@ export const AdminPortalView: React.FC = () => {
       {adminTab === 'dashboard' && (
         <div className="space-y-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-1">
+            <div className="bg-white p-4 rounded border border-slate-200 space-y-1">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Students</span>
               <div className="text-2xl font-black text-slate-900">{totalStudents}</div>
               <div className="text-[11px] text-emerald-600 font-semibold">{totalStudents - pendingStudents.length} verified</div>
             </div>
 
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-1">
+            <div className="bg-white p-4 rounded border border-slate-200 space-y-1">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Pending Student Verifs</span>
               <div className="text-2xl font-black text-amber-600">{pendingStudents.length}</div>
               <div className="text-[11px] text-slate-500">Requires review</div>
             </div>
 
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-1">
+            <div className="bg-white p-4 rounded border border-slate-200 space-y-1">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Skills Claimed</span>
               <div className="text-2xl font-black text-blue-900">{skills.length}</div>
               <div className="text-[11px] text-slate-500">Curriculum catalog</div>
             </div>
 
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-1">
+            <div className="bg-white p-4 rounded border border-slate-200 space-y-1">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Pending Skill Verifs</span>
               <div className="text-2xl font-black text-amber-600">{pendingVerifications.length}</div>
               <div className="text-[11px] text-slate-500">Requires review</div>
             </div>
 
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-1">
+            <div className="bg-white p-4 rounded border border-slate-200 space-y-1">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Active Mentoring</span>
               <div className="text-2xl font-black text-emerald-600">{activeMentoring}</div>
               <div className="text-[11px] text-slate-500">In-progress sessions</div>
             </div>
 
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-1">
+            <div className="bg-white p-4 rounded border border-slate-200  space-y-1">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Completed Mentoring</span>
               <div className="text-2xl font-black text-blue-900">{completedMentoring}</div>
               <div className="text-[11px] text-slate-500">Total successful sessions</div>
             </div>
 
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-1">
+            <div className="bg-white p-4 rounded border border-slate-200  space-y-1">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Average Rating</span>
               <div className="text-2xl font-black text-amber-500">{avgPlatformRating} ★</div>
               <div className="text-[11px] text-slate-500">{ratings.length} reviews recorded</div>
             </div>
 
-            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-1">
+            <div className="bg-white p-4 rounded border border-slate-200  space-y-1">
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Opportunities</span>
               <div className="text-2xl font-black text-indigo-600">{totalOpportunities || '301'}</div>
               <div className="text-[11px] text-slate-500">Placements & Internships</div>
             </div>
           </div>
           
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs p-5">
+          <div className="bg-white rounded border border-slate-200  p-5">
              <div className="flex items-center gap-2 mb-4">
                 <Activity className="w-4 h-4 text-slate-400" />
                 <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Recent Platform Activity</h3>
@@ -246,13 +246,13 @@ export const AdminPortalView: React.FC = () => {
       {adminTab === 'student_verif' && (
         <div className="space-y-4">
           {pendingStudents.length === 0 ? (
-            <div className="p-8 text-center bg-white rounded-2xl border border-slate-200 text-xs text-slate-500">
+            <div className="p-8 text-center bg-white rounded border border-slate-200 text-xs text-slate-500">
               No student verification claims currently pending.
             </div>
           ) : (
             <div className="space-y-3">
               {pendingStudents.map((s) => (
-                <div key={s.id} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs space-y-3 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div key={s.id} className="bg-white rounded border border-slate-200 p-5  space-y-3 flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="space-y-1.5 max-w-2xl">
                     <div className="flex items-center gap-2">
                       <span className="font-extrabold text-sm text-slate-900">{s.name}</span>
@@ -273,14 +273,14 @@ export const AdminPortalView: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setRejectModalStudent(s)}
-                      className="px-3.5 py-1.5 text-xs font-bold text-slate-600 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 rounded-xl border border-slate-300"
+                      className="px-3.5 py-1.5 text-xs font-bold text-slate-600 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 rounded border border-slate-300"
                     >
                       Reject & Remove
                     </button>
                     <button
                       type="button"
                       onClick={() => handleApproveStudent(s)}
-                      className="px-4 py-1.5 text-xs font-extrabold text-slate-900 bg-amber-400 hover:bg-amber-500 rounded-xl shadow-xs flex items-center gap-1"
+                      className="px-4 py-1.5 text-xs font-extrabold text-slate-900 bg-amber-400 hover:bg-amber-500 rounded  flex items-center gap-1"
                     >
                       <CheckCircle2 className="w-3.5 h-3.5" />
                       Verify Student
@@ -297,13 +297,13 @@ export const AdminPortalView: React.FC = () => {
       {adminTab === 'skill_verif' && (
         <div className="space-y-4">
           {verifications.length === 0 ? (
-            <div className="p-8 text-center bg-white rounded-2xl border border-slate-200 text-xs text-slate-500">
+            <div className="p-8 text-center bg-white rounded border border-slate-200 text-xs text-slate-500">
               No skill verification claims found.
             </div>
           ) : (
             <div className="space-y-3">
               {verifications.map((v) => (
-                <div key={v.id} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs space-y-3 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div key={v.id} className="bg-white rounded border border-slate-200 p-5  space-y-3 flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="space-y-1.5 max-w-2xl">
                     <div className="flex items-center gap-2">
                       <span className="font-extrabold text-sm text-slate-900">{v.studentName}</span>
@@ -322,7 +322,7 @@ export const AdminPortalView: React.FC = () => {
                       Claimed Skill: <span className="text-slate-900">{v.skillName}</span> ({v.claimedProficiency} Proficiency)
                     </div>
 
-                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-700 leading-relaxed">
+                    <div className="p-3 bg-slate-50 rounded border border-slate-200 text-xs text-slate-700 leading-relaxed">
                       <strong>Submitted Evidence:</strong> {v.evidenceNote}
                     </div>
 
@@ -338,14 +338,14 @@ export const AdminPortalView: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setRejectModalVerif(v)}
-                        className="px-3.5 py-1.5 text-xs font-bold text-slate-600 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 rounded-xl border border-slate-300"
+                        className="px-3.5 py-1.5 text-xs font-bold text-slate-600 hover:text-rose-700 bg-slate-100 hover:bg-rose-50 rounded border border-slate-300"
                       >
                         Decline
                       </button>
                       <button
                         type="button"
                         onClick={() => handleApproveSkill(v)}
-                        className="px-4 py-1.5 text-xs font-extrabold text-slate-900 bg-amber-400 hover:bg-amber-500 rounded-xl shadow-xs flex items-center gap-1"
+                        className="px-4 py-1.5 text-xs font-extrabold text-slate-900 bg-amber-400 hover:bg-amber-500 rounded  flex items-center gap-1"
                       >
                         <CheckCircle2 className="w-3.5 h-3.5" />
                         Approve Badge
@@ -363,12 +363,12 @@ export const AdminPortalView: React.FC = () => {
       {adminTab === 'requests' && (
         <div className="space-y-3">
           {requests.length === 0 && (
-             <div className="p-8 text-center bg-white rounded-2xl border border-slate-200 text-xs text-slate-500">
+             <div className="p-8 text-center bg-white rounded border border-slate-200 text-xs text-slate-500">
                No mentoring requests found.
              </div>
           )}
           {requests.map((r) => (
-            <div key={r.id} className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs flex items-center justify-between gap-4 text-xs">
+            <div key={r.id} className="bg-white p-4 rounded border border-slate-200  flex items-center justify-between gap-4 text-xs">
               <div className="space-y-0.5">
                 <div className="font-bold text-slate-900">
                   {r.requesterName} ➔ {r.mentorName} ({r.skillName})
@@ -395,13 +395,13 @@ export const AdminPortalView: React.FC = () => {
       {adminTab === 'ratings' && (
         <div className="space-y-3">
           {ratings.length === 0 && (
-             <div className="p-8 text-center bg-white rounded-2xl border border-slate-200 text-xs text-slate-500">
+             <div className="p-8 text-center bg-white rounded border border-slate-200 text-xs text-slate-500">
                No ratings and reviews found.
              </div>
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
              {ratings.map(r => (
-                <div key={r.id} className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-2">
+                <div key={r.id} className="bg-white p-4 rounded border border-slate-200  space-y-2">
                    <div className="flex items-center justify-between">
                       <span className="font-bold text-sm text-slate-900">{r.skillName} Mentoring</span>
                       <span className="flex items-center gap-1 text-amber-500 text-sm font-bold">
@@ -432,7 +432,7 @@ export const AdminPortalView: React.FC = () => {
         <div className="space-y-6">
            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Placements */}
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs p-5">
+              <div className="bg-white rounded border border-slate-200  p-5">
                  <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">
                     Placement Repository ({totalPlacements} JDs)
                  </h3>
@@ -448,7 +448,7 @@ export const AdminPortalView: React.FC = () => {
               </div>
 
               {/* Internships */}
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs p-5">
+              <div className="bg-white rounded border border-slate-200  p-5">
                  <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">
                     Internship Repository ({totalInternships} SIPs)
                  </h3>
@@ -484,21 +484,21 @@ export const AdminPortalView: React.FC = () => {
                 value={rejectRemarks}
                 onChange={(e) => setRejectRemarks(e.target.value)}
                 rows={3}
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 focus:ring-2 focus:ring-amber-500"
+                className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded text-slate-900 focus:ring-2 focus:ring-amber-500"
               />
             </div>
             <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => setRejectModalVerif(null)}
-                className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-xl font-semibold"
+                className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded font-semibold"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleRejectSkillConfirm}
-                className="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-extrabold rounded-xl"
+                className="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-extrabold rounded"
               >
                 Confirm Decline
               </button>
@@ -523,14 +523,14 @@ export const AdminPortalView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setRejectModalStudent(null)}
-                className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-xl font-semibold"
+                className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded font-semibold"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleRejectStudentConfirm}
-                className="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-extrabold rounded-xl"
+                className="px-5 py-2 bg-rose-600 hover:bg-rose-700 text-white font-extrabold rounded"
               >
                 Reject & Remove
               </button>
