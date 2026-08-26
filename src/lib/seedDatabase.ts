@@ -13,6 +13,7 @@ export async function initializeDatabase() {
       student_id VARCHAR(50) UNIQUE NOT NULL,
       email VARCHAR(255) UNIQUE NOT NULL,
       avatar VARCHAR(10),
+      password_hash VARCHAR(255) DEFAULT 'demo123',
       program VARCHAR(100),
       specialization VARCHAR(100),
       academic_year VARCHAR(100),
@@ -33,6 +34,7 @@ export async function initializeDatabase() {
       created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
       updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
     );
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255) DEFAULT 'demo123';
   `);
 
   // 2. Skills Table

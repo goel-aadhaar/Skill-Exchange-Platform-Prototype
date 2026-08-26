@@ -24,55 +24,33 @@ interface RegisterViewProps {
 }
 
 export const RegisterView: React.FC<RegisterViewProps> = ({ onGoToLogin }) => {
-  const { loginWithStudentId, skills, addToast } = useApp();
+  const { registerUser, skills } = useApp();
 
   const [step, setStep] = useState<number>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Form Fields
-  const [name, setName] = useState('Devendra Joshi');
-  const [studentId, setStudentId] = useState('25A3HP999');
-  const [email, setEmail] = useState('devendra.joshi@imthyderabad.edu.in');
-  const [password, setPassword] = useState('demo123');
-  const [program, setProgram] = useState('PGDM (Analytics)');
-  const [specialization, setSpecialization] = useState('Data Science & BI');
+  const [name, setName] = useState('');
+  const [studentId, setStudentId] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [program, setProgram] = useState('PGDM (General)');
+  const [specialization, setSpecialization] = useState('Data Analytics & IT');
   const [academicYear, setAcademicYear] = useState('Year 1 (Batch 2024–2026)');
   const [graduationYear, setGraduationYear] = useState(2026);
 
   // Step 2 Fields
   const [targetDomain, setTargetDomain] = useState('Data Analytics');
-  const [targetRole, setTargetRole] = useState('Data Analyst / BI Consultant');
-  const [careerGoal, setCareerGoal] = useState('Crack Tier-1 Analytics and Consulting placement drives.');
-  const [bio, setBio] = useState(
-    'Passionate about data visualization and SQL querying. Looking to connect with peers for technical interview practice.'
-  );
-  const [availability, setAvailability] = useState('Weekday Evenings (7 PM - 9:30 PM)');
+  const [targetRole, setTargetRole] = useState('');
+  const [careerGoal, setCareerGoal] = useState('');
+  const [bio, setBio] = useState('');
+  const [availability, setAvailability] = useState('Weekday Evenings (7 PM - 10 PM)');
 
   // Step 3: Skills to Teach
-  const [skillsToTeach, setSkillsToTeach] = useState<SkillToTeach[]>([
-    {
-      skillId: 'skill-python-data',
-      skillName: 'Python for Data Analysis',
-      domain: 'Data Analytics',
-      proficiency: 'Intermediate',
-      experienceNote: 'Completed Python coursework; Pandas & NumPy project work.',
-      verified: false,
-      sessionsHelped: 0,
-      isAvailable: true
-    }
-  ]);
+  const [skillsToTeach, setSkillsToTeach] = useState<SkillToTeach[]>([]);
 
   // Step 4: Skills to Learn
-  const [skillsToLearn, setSkillsToLearn] = useState<SkillToLearn[]>([
-    {
-      skillId: 'skill-sql',
-      skillName: 'SQL & Database Querying',
-      domain: 'Data Analytics',
-      currentLevel: 'Beginner',
-      targetLevel: 'Advanced',
-      priority: 'High'
-    }
-  ]);
+  const [skillsToLearn, setSkillsToLearn] = useState<SkillToLearn[]>([]);
 
   const [teachSearch, setTeachSearch] = useState('');
   const [learnSearch, setLearnSearch] = useState('');
@@ -121,13 +99,29 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ onGoToLogin }) => {
 
   const handleFinalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!name || !studentId || !email) {
+      setStep(1);
+      return;
+    }
+
     setIsSubmitting(true);
-    addToast({
-      type: 'success',
-      title: 'Registration Successful',
-      message: `Welcome to IMT Skill Exchange, ${name}! Your student profile has been created.`
+    const success = await registerUser({
+      name,
+      studentId,
+      email,
+      password: password || 'demo123',
+      program,
+      specialization,
+      academicYear,
+      graduationYear,
+      bio,
+      targetDomain,
+      targetRole: targetRole || 'Business Analyst',
+      careerGoal: careerGoal || 'Prepare for campus placement drives.',
+      availability,
+      skillsToTeach,
+      skillsToLearn
     });
-    await loginWithStudentId('25A3HP658'); // Login as student
     setIsSubmitting(false);
   };
 

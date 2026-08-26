@@ -59,6 +59,23 @@ interface AppContextType {
 
   // Auth & Persona
   loginWithStudentId: (studentIdOrEmail: string) => Promise<boolean>;
+  registerUser: (data: {
+    name: string;
+    studentId: string;
+    email: string;
+    password?: string;
+    program: string;
+    specialization: string;
+    academicYear: string;
+    graduationYear: number;
+    bio: string;
+    targetDomain: string;
+    targetRole: string;
+    careerGoal: string;
+    availability: string;
+    skillsToTeach: any[];
+    skillsToLearn: any[];
+  }) => Promise<boolean>;
   switchPersona: (studentIdOrEmail: string) => Promise<void>;
   logout: () => void;
   resetDatabaseData: () => Promise<void>;
@@ -302,6 +319,46 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       addToast({
         type: 'error',
         title: 'Connection Error',
+        message: err.message || 'Failed to connect to Neon database'
+      });
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Register new student in Neon PostgreSQL database
+  const registerUser = async (formData: any): Promise<boolean> => {
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      const data = await res.json();
+      if (res.ok && data.user) {
+        setCurrentUser(data.user);
+        setIsLoggedIn(true);
+        addToast({
+          type: 'success',
+          title: 'Registration Complete!',
+          message: `Account created for ${data.user.name} (${data.user.studentId}) in IMT database.`
+        });
+        await fetchStudents();
+        return true;
+      } else {
+        addToast({
+          type: 'error',
+          title: 'Registration Failed',
+          message: data.error || 'Could not register student account'
+        });
+        return false;
+      }
+    } catch (err: any) {
+      addToast({
+        type: 'error',
+        title: 'Registration Error',
         message: err.message || 'Failed to connect to Neon database'
       });
       return false;
@@ -753,6 +810,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         addToast,
         removeToast,
         loginWithStudentId,
+        registerUser,
         switchPersona,
         logout,
         resetDatabaseData,

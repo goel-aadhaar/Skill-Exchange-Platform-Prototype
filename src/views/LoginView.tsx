@@ -190,6 +190,17 @@ export const LoginView: React.FC<LoginViewProps> = ({ onGoToRegister }) => {
               <span>{isLoading ? 'Verifying with PostgreSQL...' : 'Sign In to Skill Exchange'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
+
+            <div className="flex items-center justify-between text-xs pt-1">
+              <span className="text-slate-500">New IMT student?</span>
+              <button
+                type="button"
+                onClick={onGoToRegister}
+                className="font-extrabold text-blue-900 hover:text-amber-600 underline cursor-pointer"
+              >
+                Register New Student Profile →
+              </button>
+            </div>
           </form>
 
           {/* 1-Click Demo Personas */}
