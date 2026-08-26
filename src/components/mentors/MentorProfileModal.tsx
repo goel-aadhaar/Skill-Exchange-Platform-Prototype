@@ -114,8 +114,8 @@ export const MentorProfileModal: React.FC<MentorProfileModalProps> = ({
                     <span className="font-semibold text-slate-800">{review.skillName}</span>
                     <StarRating rating={review.rating} size="sm" />
                   </div>
-                  {review.comment && (
-                    <p className="text-slate-600 italic">&quot;{review.comment}&quot;</p>
+                  {review.review && (
+                    <p className="text-slate-600 italic">&quot;{review.review}&quot;</p>
                   )}
                   <div className="text-xs text-slate-400 mt-2">
                     {new Date(review.createdAt).toLocaleDateString()}
