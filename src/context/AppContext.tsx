@@ -133,8 +133,23 @@ const DEFAULT_USER: Student = {
   isVerified: true,
   role: 'student',
   cgpa: '7.8 / 10',
-  skillsToTeach: [],
-  skillsToLearn: []
+  skillsToTeach: [
+    {
+      skillId: 'skill-excel-advanced',
+      skillName: 'Advanced Excel & VBA Macros',
+      domain: 'Finance',
+      proficiency: 'Intermediate',
+      experienceNote: 'Solid command over Pivot tables, Index-Match, and sensitivity formulas.',
+      verified: true,
+      sessionsHelped: 3,
+      isAvailable: true
+    }
+  ],
+  skillsToLearn: [
+    { skillId: 'skill-python-data', skillName: 'Python for Data Analysis', domain: 'Data Analytics', currentLevel: 'Beginner', targetLevel: 'Advanced', priority: 'High' },
+    { skillId: 'skill-sql', skillName: 'SQL & Database Querying', domain: 'Data Analytics', currentLevel: 'Beginner', targetLevel: 'Advanced', priority: 'High' },
+    { skillId: 'skill-powerbi', skillName: 'Power BI & DAX', domain: 'Data Analytics', currentLevel: 'Beginner', targetLevel: 'Intermediate', priority: 'Medium' }
+  ]
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -197,13 +212,22 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   }, []);
 
-  // Fetch Students from DB (Never overwrites currentUser to prevent race loops)
+  // Fetch Students from DB
   const fetchStudents = useCallback(async () => {
     try {
       const res = await fetch('/api/students');
       if (res.ok) {
         const data = await res.json();
         setStudents(data.students || []);
+        
+        // Sync currentUser with latest DB data
+        if (currentUserIdRef.current) {
+          const updatedMe = data.students?.find((s: any) => s.id === currentUserIdRef.current);
+          if (updatedMe) {
+            setCurrentUser(updatedMe);
+            currentUserRef.current = updatedMe;
+          }
+        }
       }
     } catch (err) {
       console.error('Error fetching students:', err);
