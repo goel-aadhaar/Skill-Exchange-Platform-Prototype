@@ -106,6 +106,7 @@ interface AppContextType {
   removeLearningSkill: (skillId: string) => Promise<boolean>;
   submitSkillVerification: (skillId: string, claimedProficiency: ProficiencyLevel, evidenceNote: string) => Promise<boolean>;
   processSkillVerification: (verificationId: string, status: 'Approved' | 'Rejected', adminRemarks?: string) => Promise<boolean>;
+  processStudentVerification: (studentId: string, action: 'Verify' | 'Reject', adminRemarks?: string) => Promise<boolean>;
   markNotificationAsRead: (id: string) => Promise<void>;
   markAllNotificationsAsRead: () => Promise<void>;
   refreshAllData: () => Promise<void>;
@@ -738,7 +739,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         body: JSON.stringify({
           verificationId,
           status,
-          adminRemarks
+          adminRemarks,
+          adminId: currentUserIdRef.current
         })
       });
       if (res.ok) {
@@ -759,6 +761,35 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   // Mark notification read
+  const processStudentVerification = async (studentId: string, action: 'Verify' | 'Reject', adminRemarks?: string): Promise<boolean> => {
+    setIsLoading(true);
+    try {
+      const res = await fetch('/api/admin/students', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentId, action, adminRemarks, adminId: currentUserIdRef.current })
+      });
+      if (res.ok) {
+        addToast({
+          type: 'success',
+          title: 'Student Profile Updated',
+          message: `Student account has been ${action === 'Verify' ? 'verified' : 'rejected'}.`
+        });
+        await fetchStudents();
+        return true;
+      } else {
+        const data = await res.json();
+        addToast({ type: 'error', title: 'Action Failed', message: data.error || 'Failed to process student verification.' });
+        return false;
+      }
+    } catch (err: any) {
+      addToast({ type: 'error', title: 'Network Error', message: err.message });
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const markNotificationAsRead = async (id: string) => {
     try {
       await fetch('/api/notifications', {
@@ -847,6 +878,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         removeLearningSkill,
         submitSkillVerification,
         processSkillVerification,
+        processStudentVerification,
         markNotificationAsRead,
         markAllNotificationsAsRead,
         refreshAllData

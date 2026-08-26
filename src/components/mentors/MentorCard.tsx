@@ -81,7 +81,9 @@ export const MentorCard: React.FC<MentorCardProps> = ({
                     ({st.proficiency})
                   </span>
                   {st.verified && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" title="Verified Skill" />
+                    <span className="flex items-center text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1 rounded-sm border border-emerald-200 uppercase tracking-wider ml-1">
+                      Verified
+                    </span>
                   )}
                 </span>
               );

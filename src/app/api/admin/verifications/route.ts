@@ -69,10 +69,15 @@ export async function POST(req: Request) {
 export async function PATCH(req: Request) {
   try {
     const body = await req.json();
-    const { verificationId, status, adminRemarks } = body;
+    const { verificationId, status, adminRemarks, adminId } = body;
 
-    if (!verificationId || !status) {
-      return NextResponse.json({ error: 'verificationId and status are required' }, { status: 400 });
+    if (!verificationId || !status || !adminId) {
+      return NextResponse.json({ error: 'verificationId, status, and adminId are required' }, { status: 400 });
+    }
+
+    const { rows: admins } = await query(`SELECT role FROM users WHERE id = $1`, [adminId]);
+    if (admins.length === 0 || admins[0].role !== 'admin') {
+      return NextResponse.json({ error: 'Unauthorized: Admin access required' }, { status: 403 });
     }
 
     const { rows } = await query(

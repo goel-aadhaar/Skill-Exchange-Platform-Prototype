@@ -131,10 +131,9 @@ export const MentorProfileModal: React.FC<MentorProfileModalProps> = ({
                     <span>•</span>
                     <span>{st.sessionsHelped} students helped</span>
                     {st.verified && (
-                      <>
-                        <span>•</span>
-                        <span className="text-emerald-700 font-medium">Verified</span>
-                      </>
+                      <span className="flex items-center text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 uppercase tracking-wider">
+                        Verified
+                      </span>
                     )}
                   </div>
                   <p className="text-xs text-slate-600 leading-normal">
