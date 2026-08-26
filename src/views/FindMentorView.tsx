@@ -78,9 +78,9 @@ export const FindMentorView: React.FC = () => {
         </p>
       </div>
 
-      <div className="space-y-4">
+      <div className="bg-white border border-slate-200 rounded overflow-hidden">
         {/* Search Bar */}
-        <div className="relative">
+        <div className="relative border-b border-slate-200">
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
             <Search className="w-4 h-4" />
           </div>
@@ -89,7 +89,7 @@ export const FindMentorView: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="What skill do you want to learn? (Search Python, SQL, Power BI...)"
-            className="w-full pl-10 pr-4 py-3 text-sm bg-white border border-slate-300 rounded text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0B192C] focus:border-[#0B192C]"
+            className="w-full pl-10 pr-4 py-3.5 text-sm bg-white text-slate-900 focus:outline-none"
           />
           {searchQuery && (
             <button
@@ -102,7 +102,7 @@ export const FindMentorView: React.FC = () => {
         </div>
 
         {/* Filters */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 bg-slate-50 p-4 border border-slate-200 rounded">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 bg-slate-50/50 p-4">
           <div>
             <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
               Domain

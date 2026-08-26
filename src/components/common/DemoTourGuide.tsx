@@ -58,7 +58,7 @@ export const DemoTourGuide: React.FC = () => {
   ];
 
   return (
-    <div className="fixed bottom-4 left-4 z-40 max-w-sm w-full">
+    <div className="fixed bottom-4 right-4 z-40 max-w-sm w-full flex flex-col items-end">
       {!isOpen ? (
         <button
           type="button"
