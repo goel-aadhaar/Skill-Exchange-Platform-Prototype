@@ -9,10 +9,10 @@ export const MySkillsView: React.FC = () => {
   const { 
     currentUser, 
     skills, 
-    addSkillToTeach, 
-    addSkillToLearn, 
-    removeSkillToTeach, 
-    removeSkillToLearn,
+    addTeachingSkill, 
+    addLearningSkill, 
+    removeTeachingSkill, 
+    removeLearningSkill,
     submitSkillVerification
   } = useApp();
 
@@ -37,20 +37,21 @@ export const MySkillsView: React.FC = () => {
 
   const handleAddTeach = async () => {
     if (!teachSkillId) return;
-    await addSkillToTeach(teachSkillId, teachProficiency as any, teachExp);
+    await addTeachingSkill(teachSkillId, teachProficiency as any, teachExp);
     setIsAddTeachOpen(false);
     setTeachExp('');
   };
 
   const handleAddLearn = async () => {
     if (!learnSkillId) return;
-    await addSkillToLearn(learnSkillId, learnCurrent as any, learnTarget as any);
+    await addLearningSkill(learnSkillId, learnCurrent as any, learnTarget as any, 'High');
     setIsAddLearnOpen(false);
   };
 
   const handleVerify = async () => {
     if (!verifSkillId) return;
-    await submitSkillVerification(verifSkillId, verifNote);
+    const skill = currentUser.skillsToTeach.find(s => s.skillId === verifSkillId);
+    await submitSkillVerification(verifSkillId, skill?.proficiency || 'Intermediate', verifNote);
     setIsVerifyOpen(false);
     setVerifNote('');
   };
@@ -160,7 +161,7 @@ export const MySkillsView: React.FC = () => {
                     </td>
                     <td className="px-4 py-3 align-middle text-right">
                       <button
-                        onClick={() => removeSkillToTeach(st.skillId)}
+                        onClick={() => removeTeachingSkill(st.skillId)}
                         className="text-slate-400 hover:text-rose-600 transition-colors p-1"
                         title="Remove Skill"
                       >
@@ -216,7 +217,7 @@ export const MySkillsView: React.FC = () => {
                     </td>
                     <td className="px-4 py-3 align-middle text-right">
                       <button
-                        onClick={() => removeSkillToLearn(sl.skillId)}
+                        onClick={() => removeLearningSkill(sl.skillId)}
                         className="text-slate-400 hover:text-rose-600 transition-colors p-1"
                         title="Remove Goal"
                       >

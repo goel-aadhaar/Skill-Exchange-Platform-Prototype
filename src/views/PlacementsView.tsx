@@ -123,10 +123,12 @@ export const PlacementsView: React.FC = () => {
   const renderDetailPanel = () => {
     if (!selectedJob) return null;
     
-    const isPlacement = 'ctc' in selectedJob;
-    const reqSkills = parseSkills(selectedJob.requiredSkills);
+    const isPlacement = 'ctcOffered' in selectedJob;
+    const reqSkillsStr = 'skillsRequired' in selectedJob ? (selectedJob as any).skillsRequired : '';
+    const reqSkills = parseSkills(reqSkillsStr);
     
     const missingSkills = reqSkills.filter(s => !hasSkill(s));
+    const location = 'locations' in selectedJob ? (selectedJob as any).locations : (selectedJob as any).location;
     
     return (
       <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
@@ -147,7 +149,7 @@ export const PlacementsView: React.FC = () => {
             <div className="grid grid-cols-2 gap-y-4 text-sm">
               <div>
                 <div className="text-slate-500 font-medium mb-0.5">Location</div>
-                <div className="font-semibold text-slate-900">{selectedJob.location || 'Not specified'}</div>
+                <div className="font-semibold text-slate-900">{location || 'Not specified'}</div>
               </div>
               {isPlacement && (
                 <div>
@@ -158,7 +160,7 @@ export const PlacementsView: React.FC = () => {
               {isPlacement ? (
                 <div>
                   <div className="text-slate-500 font-medium mb-0.5">CTC</div>
-                  <div className="font-semibold text-slate-900">{(selectedJob as PlacementJob).ctc || 'Not specified'}</div>
+                  <div className="font-semibold text-slate-900">{(selectedJob as PlacementJob).ctcOffered || 'Not specified'}</div>
                 </div>
               ) : (
                 <div>
@@ -393,7 +395,7 @@ export const PlacementsView: React.FC = () => {
                   <tr key={job.id} className="hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => setSelectedJob(job)}>
                     <td className="px-4 py-3 align-middle font-medium text-slate-900">{job.companyName}</td>
                     <td className="px-4 py-3 align-middle">{job.role}</td>
-                    <td className="px-4 py-3 align-middle hidden md:table-cell text-slate-600">{job.location}</td>
+                    <td className="px-4 py-3 align-middle hidden md:table-cell text-slate-600">{(job as any).locations}</td>
                     <td className="px-4 py-3 align-middle text-right">
                       <span className="text-[#0B192C] font-bold text-xs hover:underline">View Details</span>
                     </td>

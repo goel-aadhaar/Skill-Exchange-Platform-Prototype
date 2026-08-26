@@ -234,6 +234,10 @@ export const MyRequestsView: React.FC = () => {
           isOpen={!!selectedRequestForWorkspace}
           onClose={() => setSelectedRequestForWorkspace(null)}
           request={selectedRequestForWorkspace}
+          onCompleteAndRate={(r) => {
+            setSelectedRequestForWorkspace(null);
+            setSelectedRequestForRating(r);
+          }}
         />
       )}
     </div>
