@@ -143,7 +143,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   onClick={() => handleNavClick(item.id)}
                   className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
                     isActive
-                      ? 'bg-[#0F2942] text-amber-400 shadow-md font-extrabold'
+                      ? 'bg-[#0B192C] text-amber-400 shadow-md font-extrabold'
                       : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
                   }`}
                 >
@@ -185,7 +185,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   onClick={() => handleNavClick(item.id)}
                   className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
                     isActive
-                      ? 'bg-[#0F2942] text-amber-400 shadow-md font-extrabold'
+                      ? 'bg-[#0B192C] text-amber-400 shadow-md font-extrabold'
                       : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
                   }`}
                 >
@@ -229,7 +229,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   onClick={() => handleNavClick(item.id)}
                   className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
                     isActive
-                      ? 'bg-[#0F2942] text-amber-400 shadow-md font-extrabold'
+                      ? 'bg-[#0B192C] text-amber-400 shadow-md font-extrabold'
                       : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
                   }`}
                 >

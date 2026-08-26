@@ -6,6 +6,7 @@ export const IMT_BRAND = {
   platformName: 'IMT Skill Exchange',
   tagline: 'Peer Mentoring & Placement Readiness Hub',
   establishedYear: '2011',
+  logoPath: '/imt-logo.jpg',
   colors: {
     navyDark: '#0B192C',     // Anchor Deep Navy
     navyRoyal: '#1E3A8A',    // Classic Academic Blue
@@ -23,29 +24,30 @@ export const IMT_BRAND = {
 export const ImtLogo: React.FC<{
   className?: string;
   variant?: 'full' | 'compact' | 'white';
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'sm' | 'md' | 'lg' | 'xl';
 }> = ({ className = '', variant = 'full', size = 'md' }) => {
   const isWhite = variant === 'white';
 
+  const logoDimension =
+    size === 'sm'
+      ? 'w-8 h-8'
+      : size === 'lg'
+      ? 'w-12 h-12'
+      : size === 'xl'
+      ? 'w-16 h-16'
+      : 'w-10 h-10';
+
   return (
     <div className={`flex items-center gap-3 ${className}`}>
-      {/* Handcrafted Academic Crest Emblem */}
+      {/* Official IMT Hyderabad Crest Logo Image */}
       <div
-        className={`relative flex items-center justify-center rounded-2xl font-serif-display font-black shadow-xs transition-transform duration-200 hover:scale-105 select-none ${
-          size === 'sm'
-            ? 'w-8 h-8 text-xs'
-            : size === 'lg'
-            ? 'w-12 h-12 text-base'
-            : 'w-10 h-10 text-sm'
-        } ${
-          isWhite
-            ? 'bg-amber-400 text-[#0B192C] border border-amber-300 ring-2 ring-white/20'
-            : 'bg-[#0B192C] text-amber-400 border border-amber-500/40 ring-1 ring-black/5'
-        }`}
+        className={`relative flex items-center justify-center rounded-2xl bg-white p-1 border border-slate-200 shadow-2xs transition-transform duration-200 hover:scale-105 select-none overflow-hidden shrink-0 ${logoDimension}`}
       >
-        <span className="tracking-tight font-extrabold">IMT</span>
-        {/* Academic gold badge pip */}
-        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400 border-2 border-white shadow-xs" />
+        <img
+          src="/imt-logo.jpg"
+          alt="IMT Hyderabad Official Crest"
+          className="w-full h-full object-contain"
+        />
       </div>
 
       {variant !== 'compact' && (
@@ -53,7 +55,11 @@ export const ImtLogo: React.FC<{
           <div className="flex items-center gap-1.5 leading-none">
             <span
               className={`font-black tracking-tight ${
-                size === 'sm' ? 'text-sm' : size === 'lg' ? 'text-xl' : 'text-base'
+                size === 'sm'
+                  ? 'text-sm'
+                  : size === 'lg' || size === 'xl'
+                  ? 'text-xl'
+                  : 'text-base'
               } ${isWhite ? 'text-white' : 'text-[#0B192C]'}`}
             >
               IMT <span className="text-amber-500 font-extrabold">Skill Exchange</span>
