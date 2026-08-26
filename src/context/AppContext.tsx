@@ -160,6 +160,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [requestModalPreselectedSkill, setRequestModalPreselectedSkill] = useState<string | null>(null);
   const [selectedSkillForMentorSearch, setSelectedSkillForMentorSearch] = useState<string | null>(null);
 
+  // Refs to prevent closure staleness and infinite re-render loops
+  const currentUserRef = React.useRef<Student>(currentUser);
+  const currentUserIdRef = React.useRef<string>(currentUser.id);
+
+  useEffect(() => {
+    currentUserRef.current = currentUser;
+    currentUserIdRef.current = currentUser.id;
+  }, [currentUser]);
+
   // Toast Helpers
   const addToast = useCallback((toast: Omit<ToastMessage, 'id'>) => {
     const id = `toast-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`;
@@ -187,29 +196,27 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   }, []);
 
-  // Fetch Students from DB
+  // Fetch Students from DB (Never overwrites currentUser to prevent race loops)
   const fetchStudents = useCallback(async () => {
     try {
       const res = await fetch('/api/students');
       if (res.ok) {
         const data = await res.json();
         setStudents(data.students || []);
-
-        // Also update currentUser if in students list
-        const updatedSelf = data.students?.find((s: Student) => s.id === currentUser.id);
-        if (updatedSelf) {
-          setCurrentUser(updatedSelf);
-        }
       }
     } catch (err) {
       console.error('Error fetching students:', err);
     }
-  }, [currentUser.id]);
+  }, []);
 
   // Fetch User-specific Requests from DB
-  const fetchRequests = useCallback(async () => {
+  const fetchRequests = useCallback(async (targetUserId?: string, targetRole?: string) => {
     try {
-      const url = currentUser.role === 'admin' ? '/api/requests' : `/api/requests?userId=${currentUser.id}`;
+      const uId = targetUserId || currentUserIdRef.current;
+      const uRole = targetRole || currentUserRef.current?.role;
+      if (!uId) return;
+
+      const url = uRole === 'admin' ? '/api/requests' : `/api/requests?userId=${uId}`;
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
@@ -218,12 +225,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     } catch (err) {
       console.error('Error fetching requests:', err);
     }
-  }, [currentUser.id, currentUser.role]);
+  }, []);
 
   // Fetch Notifications
-  const fetchNotifications = useCallback(async () => {
+  const fetchNotifications = useCallback(async (targetUserId?: string) => {
     try {
-      const res = await fetch(`/api/notifications?userId=${currentUser.id}`);
+      const uId = targetUserId || currentUserIdRef.current;
+      if (!uId) return;
+
+      const res = await fetch(`/api/notifications?userId=${uId}`);
       if (res.ok) {
         const data = await res.json();
         setNotifications(data.notifications || []);
@@ -231,7 +241,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     } catch (err) {
       console.error('Error fetching notifications:', err);
     }
-  }, [currentUser.id]);
+  }, []);
 
   // Fetch Ratings
   const fetchRatings = useCallback(async () => {
@@ -259,30 +269,34 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   }, []);
 
-  // Refresh all application data
+  // Refresh all application data once on initial load
   const refreshAllData = useCallback(async () => {
     await Promise.all([
       fetchSkillsAndDomains(),
       fetchStudents(),
-      fetchRequests(),
-      fetchNotifications(),
+      fetchRequests(currentUserIdRef.current, currentUserRef.current?.role),
+      fetchNotifications(currentUserIdRef.current),
       fetchRatings(),
       fetchVerifications()
     ]);
   }, [fetchSkillsAndDomains, fetchStudents, fetchRequests, fetchNotifications, fetchRatings, fetchVerifications]);
 
-  // Initial load
+  // Initial load only
   useEffect(() => {
     refreshAllData();
-  }, [refreshAllData]);
+  }, []);
 
-  // Real-time Background Polling Sync (every 4 seconds for live multi-user updates)
+  // Real-time Background Polling Sync (every 4 seconds)
   useEffect(() => {
     if (!isLoggedIn) return;
 
     const interval = setInterval(() => {
-      fetchRequests();
-      fetchNotifications();
+      const uId = currentUserIdRef.current;
+      const uRole = currentUserRef.current?.role;
+      if (uId) {
+        fetchRequests(uId, uRole);
+        fetchNotifications(uId);
+      }
     }, 4000);
 
     return () => clearInterval(interval);
@@ -299,13 +313,24 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       });
       const data = await res.json();
       if (res.ok && data.user) {
+        currentUserRef.current = data.user;
+        currentUserIdRef.current = data.user.id;
         setCurrentUser(data.user);
         setIsLoggedIn(true);
+
         addToast({
           type: 'success',
-          title: 'Welcome to IMT Skill Exchange',
-          message: `Logged in as ${data.user.name} (${data.user.studentId || data.user.program})`
+          title: 'Active Persona Switched',
+          message: `Switched to ${data.user.name} (${data.user.studentId || data.user.program})`
         });
+
+        // Immediately sync data for new persona
+        await Promise.all([
+          fetchRequests(data.user.id, data.user.role),
+          fetchNotifications(data.user.id),
+          fetchStudents()
+        ]);
+
         return true;
       } else {
         addToast({
@@ -338,6 +363,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       });
       const data = await res.json();
       if (res.ok && data.user) {
+        currentUserRef.current = data.user;
+        currentUserIdRef.current = data.user.id;
         setCurrentUser(data.user);
         setIsLoggedIn(true);
         addToast({
@@ -345,7 +372,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           title: 'Registration Complete!',
           message: `Account created for ${data.user.name} (${data.user.studentId}) in IMT database.`
         });
-        await fetchStudents();
+        await Promise.all([
+          fetchRequests(data.user.id, data.user.role),
+          fetchNotifications(data.user.id),
+          fetchStudents()
+        ]);
         return true;
       } else {
         addToast({
@@ -369,16 +400,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // Switch Persona between the 5 real seeded student accounts
   const switchPersona = async (studentIdOrEmail: string) => {
-    setIsLoading(true);
-    try {
-      const success = await loginWithStudentId(studentIdOrEmail);
-      if (success) {
-        // re-fetch user specific requests & notifications
-        await Promise.all([fetchRequests(), fetchNotifications(), fetchStudents()]);
-      }
-    } finally {
-      setIsLoading(false);
-    }
+    await loginWithStudentId(studentIdOrEmail);
   };
 
   const logout = () => {
