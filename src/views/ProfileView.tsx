@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 
 export const ProfileView: React.FC = () => {
-  const { currentUser, ratings, addToast } = useApp();
+  const { currentUser, ratings, addToast, updateCurrentUser } = useApp();
 
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isReportOpen, setIsReportOpen] = useState(false);
@@ -47,13 +47,16 @@ export const ProfileView: React.FC = () => {
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
-    currentUser.name = name;
-    currentUser.bio = bio;
-    currentUser.targetDomain = targetDomain;
-    currentUser.targetRole = targetRole;
-    currentUser.careerGoal = careerGoal;
-    currentUser.availability = availability;
-    currentUser.specialization = specialization;
+    updateCurrentUser({
+      ...currentUser,
+      name,
+      bio,
+      targetDomain,
+      targetRole,
+      careerGoal,
+      availability,
+      specialization
+    });
     addToast({
       type: 'success',
       title: 'Profile Updated',

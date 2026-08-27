@@ -1,5 +1,39 @@
+import { z } from 'zod';
 import { NextResponse } from 'next/server';
 import { query } from '../../../lib/db';
+
+// Schema for POST body validation
+const studentPostSchema = z.object({
+  name: z.string().nonempty(),
+  email: z.string().email(),
+  studentId: z.string().nonempty(),
+  program: z.string().optional(),
+  specialization: z.string().optional(),
+  academicYear: z.string().optional(),
+  graduationYear: z.string().optional()
+});
+
+export async function POST(req: Request) {
+  try {
+    const parseResult = studentPostSchema.safeParse(await req.json());
+    if (!parseResult.success) {
+      const errorMessages = parseResult.error.errors.map(e => `${e.path.join('.')}: ${e.message}`);
+      return NextResponse.json({ error: errorMessages.join(', ') }, { status: 400 });
+    }
+    const { name, email, studentId, program, specialization, academicYear, graduationYear } = parseResult.data;
+    // Insert new student (users table) – simplified columns
+    await query(
+      `INSERT INTO users (name, email, student_id, program, specialization, academic_year, graduation_year) VALUES ($1, $2, $3, $4, $5, $6, $7)
+       ON CONFLICT (student_id) DO UPDATE SET name = EXCLUDED.name, email = EXCLUDED.email, program = EXCLUDED.program,
+       specialization = EXCLUDED.specialization, academic_year = EXCLUDED.academic_year, graduation_year = EXCLUDED.graduation_year;`,
+      [name, email, studentId, program || null, specialization || null, academicYear || null, graduationYear || null]
+    );
+    return NextResponse.json({ success: true, message: 'Student record saved' });
+  } catch (error: any) {
+    console.error('Student POST error:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
 
 export async function GET(req: Request) {
   try {

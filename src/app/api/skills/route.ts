@@ -1,4 +1,17 @@
+import { z } from 'zod';
 import { NextResponse } from 'next/server';
+
+// Schema for POST body validation
+const skillPostSchema = z.object({
+  studentId: z.string().nonempty(),
+  skillId: z.string().nonempty(),
+  skillType: z.enum(['TEACH', 'LEARN']),
+  proficiency: z.string().optional(),
+  experienceNote: z.string().optional(),
+  currentLevel: z.string().optional(),
+  targetLevel: z.string().optional(),
+  priority: z.string().optional(),
+});
 import { query } from '../../../lib/db';
 
 export async function GET() {
@@ -38,13 +51,13 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { studentId, skillId, skillType, proficiency, experienceNote, currentLevel, targetLevel, priority } = body;
-
-    if (!studentId || !skillId || !skillType) {
-      return NextResponse.json({ error: 'studentId, skillId, and skillType are required' }, { status: 400 });
+    const parseResult = skillPostSchema.safeParse(await req.json());
+    if (!parseResult.success) {
+      const errorMessages = parseResult.error.errors.map(e => `${e.path.join('.')}: ${e.message}`);
+      return NextResponse.json({ error: errorMessages.join(', ') }, { status: 400 });
     }
-
+    const { studentId, skillId, skillType, proficiency, experienceNote, currentLevel, targetLevel, priority } = parseResult.data;
+    
     const id = `ss-${skillType.toLowerCase()}-${studentId}-${skillId}`;
 
     if (skillType === 'TEACH') {

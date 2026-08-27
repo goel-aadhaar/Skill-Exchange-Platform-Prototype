@@ -1,5 +1,6 @@
 'use client';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import {
   Student,
@@ -78,6 +79,7 @@ interface AppContextType {
   }) => Promise<boolean>;
   switchPersona: (studentIdOrEmail: string) => Promise<void>;
   logout: () => void;
+  updateCurrentUser: (user: Student) => void;
   resetDatabaseData: () => Promise<void>;
 
   // Data Actions
@@ -375,6 +377,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const updateCurrentUser = (user: Student) => {
+    setCurrentUser(user);
+    currentUserRef.current = user;
+    currentUserIdRef.current = user.id;
   };
 
   // Register new student in Neon PostgreSQL database
@@ -890,6 +898,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         registerUser,
         switchPersona,
         logout,
+        updateCurrentUser,
+
         resetDatabaseData,
         sendMentoringRequest,
         acceptMentoringRequest,
