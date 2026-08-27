@@ -41,13 +41,13 @@ export const RecommendedMentors: React.FC<RecommendedMentorsProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+      <div className="flex flex-col gap-3 border-b border-slate-100 pb-2">
         <div>
-          <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            <Users className="w-4 h-4 text-blue-900" />
-            Recommended Peer Mentors for You
+          <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-start gap-2">
+            <Users className="w-4 h-4 text-blue-900 mt-1 shrink-0" />
+            <span>Recommended Peer Mentors for You</span>
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-slate-500 mt-1 ml-6">
             Ranked by relevance to your target learning goals and peer ratings
           </p>
         </div>
@@ -58,7 +58,7 @@ export const RecommendedMentors: React.FC<RecommendedMentorsProps> = ({
             setSelectedSkillForMentorSearch(null);
             setActiveTab('find_mentor');
           }}
-          className="text-xs font-bold text-blue-900 hover:text-amber-600 flex items-center gap-1"
+          className="text-xs font-bold text-blue-900 hover:text-amber-600 flex items-center gap-1 self-start ml-6"
         >
           <span>Explore All Campus Mentors →</span>
         </button>

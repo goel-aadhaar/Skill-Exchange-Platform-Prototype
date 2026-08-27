@@ -69,17 +69,19 @@ export const MentorCard: React.FC<MentorCardProps> = ({
             </span>
           </div>
 
-          <div className="text-[11px] text-slate-500 flex flex-wrap items-center gap-1">
-            <span className="font-semibold text-slate-700">Can teach:</span>
-            {mentor.skillsToTeach.map((s, i) => (
-              <span key={s.skillId}>
-                {s.skillName}{i < mentor.skillsToTeach.length - 1 ? ', ' : ''}
-              </span>
-            ))}
-          </div>
+          {mentor.skillsToTeach.length > 0 && (
+            <div className="text-[11px] text-slate-500 flex flex-wrap items-center gap-1 mt-1">
+              <span className="font-semibold text-slate-700">Can teach:</span>
+              {mentor.skillsToTeach.map((s, i) => (
+                <span key={s.skillId}>
+                  {s.skillName}{i < mentor.skillsToTeach.length - 1 ? ', ' : ''}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
-        <div className="flex flex-row flex-wrap items-center justify-start sm:justify-end gap-2 shrink-0 w-full sm:w-auto">
+        <div className="flex flex-row flex-wrap items-center justify-start md:justify-end gap-2 shrink-0 w-full md:w-auto pt-2 md:pt-0 md:ml-auto">
           {onToggleSave && (
             <button
               type="button"
