@@ -65,6 +65,7 @@ interface AppContextType {
     studentId: string;
     email: string;
     password?: string;
+    cgpa: number;
     program: string;
     specialization: string;
     academicYear: string;

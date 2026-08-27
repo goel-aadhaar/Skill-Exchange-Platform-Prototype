@@ -60,15 +60,17 @@ export async function POST(req: Request) {
       .slice(0, 2)
       .toUpperCase();
 
+    const parsedCgpa = parseFloat(body.cgpa) || 8.5;
+
     // Insert new user into PostgreSQL
     await query(
       `
       INSERT INTO users (
         id, name, student_id, email, password_hash, avatar, program, specialization,
         academic_year, graduation_year, bio, target_domain, target_role, career_goal,
-        availability, rating, ratings_count, sessions_completed, is_verified, role, created_at
+        availability, rating, ratings_count, sessions_completed, is_verified, role, cgpa, created_at
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, 5.0, 0, 0, false, 'student', NOW()
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, 5.0, 0, 0, false, 'student', $16, NOW()
       )
     `,
       [
@@ -86,7 +88,8 @@ export async function POST(req: Request) {
         targetDomain || 'Data Analytics',
         targetRole || 'Business Analyst',
         careerGoal || 'Secure campus internship/placement.',
-        availability || 'Weekday Evenings (7 PM - 10 PM)'
+        availability || 'Weekday Evenings (7 PM - 10 PM)',
+        parsedCgpa
       ]
     );
 
@@ -145,6 +148,7 @@ export async function POST(req: Request) {
       sessionsCompleted: 0,
       isVerified: false,
       role: 'student',
+      cgpa: parsedCgpa,
       skillsToTeach: (skillsToTeach || []).map((s: any) => ({
         skillId: s.skillId,
         skillName: s.skillName,

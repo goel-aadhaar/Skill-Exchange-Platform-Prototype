@@ -12,8 +12,7 @@ import {
   LogOut,
   User,
   Shield,
-  Sparkles,
-  Database
+  Sparkles
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -74,14 +73,8 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isMobileSidebar
             </div>
           </div>
 
-          {/* Right: Neon DB live indicator, Demo Switcher, Notification, User Pill */}
+          {/* Right: Demo Switcher, Notification, User Pill */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Database Live Indicator Badge */}
-            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-extrabold tracking-wide">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <Database className="w-3 h-3 text-emerald-600" />
-              <span>Neon PostgreSQL Live</span>
-            </div>
 
             {/* Persona Switcher */}
             <DemoSwitcher />
