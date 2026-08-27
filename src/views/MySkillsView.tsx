@@ -34,26 +34,42 @@ export const MySkillsView: React.FC = () => {
   const [isVerifyOpen, setIsVerifyOpen] = useState(false);
   const [verifSkillId, setVerifSkillId] = useState('');
   const [verifNote, setVerifNote] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleAddTeach = async () => {
-    if (!teachSkillId) return;
-    await addTeachingSkill(teachSkillId, teachProficiency as any, teachExp);
-    setIsAddTeachOpen(false);
-    setTeachExp('');
+    const sId = teachSkillId || (skills.length > 0 ? skills[0].id : '');
+    if (!sId) return;
+    setIsSubmitting(true);
+    const success = await addTeachingSkill(sId, teachProficiency as any, teachExp);
+    setIsSubmitting(false);
+    if (success) {
+      setIsAddTeachOpen(false);
+      setTeachExp('');
+    }
   };
 
   const handleAddLearn = async () => {
-    if (!learnSkillId) return;
-    await addLearningSkill(learnSkillId, learnCurrent as any, learnTarget as any, 'High');
-    setIsAddLearnOpen(false);
+    const sId = learnSkillId || (skills.length > 0 ? skills[0].id : '');
+    if (!sId) return;
+    setIsSubmitting(true);
+    const success = await addLearningSkill(sId, learnCurrent as any, learnTarget as any, 'High');
+    setIsSubmitting(false);
+    if (success) {
+      setIsAddLearnOpen(false);
+    }
   };
 
   const handleVerify = async () => {
-    if (!verifSkillId) return;
-    const skill = currentUser.skillsToTeach.find(s => s.skillId === verifSkillId);
-    await submitSkillVerification(verifSkillId, skill?.proficiency || 'Intermediate', verifNote);
-    setIsVerifyOpen(false);
-    setVerifNote('');
+    const sId = verifSkillId || (currentUser.skillsToTeach.filter(s => !s.verified)[0]?.skillId || '');
+    if (!sId) return;
+    const skill = currentUser.skillsToTeach.find(s => s.skillId === sId);
+    setIsSubmitting(true);
+    const success = await submitSkillVerification(sId, skill?.proficiency || 'Intermediate', verifNote);
+    setIsSubmitting(false);
+    if (success) {
+      setIsVerifyOpen(false);
+      setVerifNote('');
+    }
   };
 
   return (
@@ -261,7 +277,14 @@ export const MySkillsView: React.FC = () => {
             <label className="block text-xs font-bold text-slate-700 mb-1">Experience Note</label>
             <textarea value={teachExp} onChange={e => setTeachExp(e.target.value)} placeholder="E.g., Used in 2 live projects" className="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:ring-[#0B192C] h-20" />
           </div>
-          <button onClick={handleAddTeach} className="w-full bg-[#0B192C] text-white py-2 rounded text-sm font-bold">Add Skill</button>
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={handleAddTeach}
+            className="w-full bg-[#0B192C] hover:bg-blue-900 disabled:opacity-50 text-white py-2 rounded text-sm font-bold transition-colors"
+          >
+            {isSubmitting ? 'Saving to Database...' : 'Add Skill'}
+          </button>
         </div>
       </Modal>
 
@@ -288,7 +311,14 @@ export const MySkillsView: React.FC = () => {
               <option value="Advanced">Advanced</option>
             </select>
           </div>
-          <button onClick={handleAddLearn} className="w-full bg-[#0B192C] text-white py-2 rounded text-sm font-bold">Add Goal</button>
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={handleAddLearn}
+            className="w-full bg-[#0B192C] hover:bg-blue-900 disabled:opacity-50 text-white py-2 rounded text-sm font-bold transition-colors"
+          >
+            {isSubmitting ? 'Saving to Database...' : 'Add Goal'}
+          </button>
         </div>
       </Modal>
 
@@ -306,7 +336,14 @@ export const MySkillsView: React.FC = () => {
             <label className="block text-xs font-bold text-slate-700 mb-1">Evidence / Proof</label>
             <textarea value={verifNote} onChange={e => setVerifNote(e.target.value)} placeholder="Provide link to certification, project repo, or explanation..." className="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:ring-[#0B192C] h-24" />
           </div>
-          <button onClick={handleVerify} className="w-full bg-emerald-700 text-white py-2 rounded text-sm font-bold">Submit for Verification</button>
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={handleVerify}
+            className="w-full bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white py-2 rounded text-sm font-bold transition-colors"
+          >
+            {isSubmitting ? 'Submitting to Placement Cell...' : 'Submit for Verification'}
+          </button>
         </div>
       </Modal>
 

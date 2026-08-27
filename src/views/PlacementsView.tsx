@@ -46,16 +46,19 @@ export const PlacementsView: React.FC = () => {
 
       const res = await fetch(`/api/placements?${q.toString()}`);
       const data = await res.json();
-      if (data.placements) {
-        setPlacementJobs(data.placements);
-        setTotalPlacements(data.total);
-        setPlacementTotalPages(data.totalPages);
+      const list = data.placements || data.jobs;
+      if (list) {
+        setPlacementJobs(list);
+        setTotalPlacements(data.total || list.length);
+        setPlacementTotalPages(data.totalPages || 1);
 
-        if (sectorOptions.length === 0 && data.sectors) {
-          setSectorOptions(data.sectors);
+        const sectors = data.sectors || data.filters?.sectors;
+        const domains = data.domains || data.filters?.domains;
+        if (sectors && sectors.length > 0) {
+          setSectorOptions(sectors);
         }
-        if (domainOptions.length === 0 && data.domains) {
-          setDomainOptions(data.domains);
+        if (domains && domains.length > 0) {
+          setDomainOptions(domains);
         }
       }
     } catch (e) {
@@ -131,8 +134,14 @@ export const PlacementsView: React.FC = () => {
     const location = 'locations' in selectedJob ? (selectedJob as any).locations : (selectedJob as any).location;
     
     return (
-      <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/40 backdrop-blur-sm animate-in fade-in">
-        <div className="bg-white w-full max-w-md h-full flex flex-col shadow-2xl animate-in slide-in-from-right">
+      <div
+        className="fixed inset-0 z-50 flex justify-end bg-slate-900/40 backdrop-blur-xs animate-in fade-in"
+        onClick={() => setSelectedJob(null)}
+      >
+        <div
+          className="bg-white w-full max-w-md h-full flex flex-col shadow-2xl animate-in slide-in-from-right"
+          onClick={(e) => e.stopPropagation()}
+        >
           <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
             <h2 className="text-lg font-bold text-slate-900">Opportunity Details</h2>
             <button onClick={() => setSelectedJob(null)} className="text-slate-400 hover:text-slate-700">

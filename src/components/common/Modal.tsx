@@ -59,9 +59,9 @@ export const Modal: React.FC<ModalProps> = ({
       />
 
       {/* Modal Dialog */}
-      <div className="flex min-h-full items-center justify-center p-4 sm:p-6 text-center">
+      <div className="flex min-h-full items-center justify-center p-4 sm:p-6 text-center relative z-10 pointer-events-none">
         <div
-          className={`w-full ${maxWidthClasses} transform overflow-hidden rounded-xl bg-white text-left align-middle shadow-2xl transition-all border border-slate-200 animate-in zoom-in-95 duration-150 my-8`}
+          className={`w-full ${maxWidthClasses} transform overflow-hidden rounded-xl bg-white text-left align-middle shadow-2xl transition-all border border-slate-200 animate-in zoom-in-95 duration-150 my-8 pointer-events-auto`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}

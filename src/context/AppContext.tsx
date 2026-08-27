@@ -79,7 +79,7 @@ interface AppContextType {
   }) => Promise<boolean>;
   switchPersona: (studentIdOrEmail: string) => Promise<void>;
   logout: () => void;
-  updateCurrentUser: (user: Student) => void;
+  updateCurrentUser: (user: Student) => Promise<boolean>;
   resetDatabaseData: () => Promise<void>;
 
   // Data Actions
@@ -313,21 +313,27 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     refreshAllData();
   }, []);
 
-  // Real-time Background Polling Sync (every 4 seconds)
+  // Real-time Background Polling Sync (every 4 seconds for requests/notifs, every 8 seconds for students/ratings)
   useEffect(() => {
     if (!isLoggedIn) return;
 
+    let tick = 0;
     const interval = setInterval(() => {
       const uId = currentUserIdRef.current;
       const uRole = currentUserRef.current?.role;
       if (uId) {
         fetchRequests(uId, uRole);
         fetchNotifications(uId);
+        tick++;
+        if (tick % 2 === 0) {
+          fetchStudents();
+          fetchRatings();
+        }
       }
     }, 4000);
 
     return () => clearInterval(interval);
-  }, [isLoggedIn, fetchRequests, fetchNotifications]);
+  }, [isLoggedIn, fetchRequests, fetchNotifications, fetchStudents, fetchRatings]);
 
   // Login with student ID or Email against Neon PostgreSQL
   const loginWithStudentId = async (studentIdOrEmail: string): Promise<boolean> => {
@@ -379,10 +385,46 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   };
 
-  const updateCurrentUser = (user: Student) => {
-    setCurrentUser(user);
-    currentUserRef.current = user;
-    currentUserIdRef.current = user.id;
+  const updateCurrentUser = async (user: Student): Promise<boolean> => {
+    try {
+      const res = await fetch('/api/students', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: user.id,
+          name: user.name,
+          bio: user.bio,
+          targetDomain: user.targetDomain,
+          targetRole: user.targetRole,
+          careerGoal: user.careerGoal,
+          availability: user.availability,
+          specialization: user.specialization,
+          program: user.program,
+          academicYear: user.academicYear,
+          graduationYear: user.graduationYear
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.student) {
+        setCurrentUser(data.student);
+        currentUserRef.current = data.student;
+        currentUserIdRef.current = data.student.id;
+        await fetchStudents();
+        return true;
+      } else {
+        setCurrentUser(user);
+        currentUserRef.current = user;
+        currentUserIdRef.current = user.id;
+        return false;
+      }
+    } catch (err: any) {
+      console.error('Failed to update student in PostgreSQL:', err);
+      setCurrentUser(user);
+      currentUserRef.current = user;
+      currentUserIdRef.current = user.id;
+      return false;
+    }
   };
 
   // Register new student in Neon PostgreSQL database

@@ -35,6 +35,153 @@ export async function POST(req: Request) {
   }
 }
 
+const studentPatchSchema = z.object({
+  id: z.string().nonempty(),
+  name: z.string().optional(),
+  bio: z.string().optional(),
+  targetDomain: z.string().optional(),
+  targetRole: z.string().optional(),
+  careerGoal: z.string().optional(),
+  availability: z.string().optional(),
+  specialization: z.string().optional(),
+  program: z.string().optional(),
+  academicYear: z.string().optional(),
+  graduationYear: z.number().optional()
+});
+
+export async function PATCH(req: Request) {
+  try {
+    const parseResult = studentPatchSchema.safeParse(await req.json());
+    if (!parseResult.success) {
+      const errorMessages = parseResult.error.errors.map((e) => `${e.path.join('.')}: ${e.message}`);
+      return NextResponse.json({ error: errorMessages.join(', ') }, { status: 400 });
+    }
+
+    const {
+      id,
+      name,
+      bio,
+      targetDomain,
+      targetRole,
+      careerGoal,
+      availability,
+      specialization,
+      program,
+      academicYear,
+      graduationYear
+    } = parseResult.data;
+
+    // Verify user exists
+    const { rows: userRows } = await query(`SELECT * FROM users WHERE id = $1`, [id]);
+    if (userRows.length === 0) {
+      return NextResponse.json({ error: 'Student account not found' }, { status: 404 });
+    }
+
+    await query(
+      `
+      UPDATE users 
+      SET 
+        name = COALESCE($1, name),
+        bio = COALESCE($2, bio),
+        target_domain = COALESCE($3, target_domain),
+        target_role = COALESCE($4, target_role),
+        career_goal = COALESCE($5, career_goal),
+        availability = COALESCE($6, availability),
+        specialization = COALESCE($7, specialization),
+        program = COALESCE($8, program),
+        academic_year = COALESCE($9, academic_year),
+        graduation_year = COALESCE($10, graduation_year),
+        updated_at = NOW()
+      WHERE id = $11
+    `,
+      [
+        name || null,
+        bio !== undefined ? bio : null,
+        targetDomain || null,
+        targetRole || null,
+        careerGoal !== undefined ? careerGoal : null,
+        availability || null,
+        specialization || null,
+        program || null,
+        academicYear || null,
+        graduationYear || null,
+        id
+      ]
+    );
+
+    // Fetch updated student with all skills
+    const { rows: updatedRows } = await query(`SELECT * FROM users WHERE id = $1`, [id]);
+    const updatedUser = updatedRows[0];
+
+    const teachRes = await query(
+      `SELECT ss.*, s.name as skill_name, s.domain 
+       FROM student_skills ss 
+       JOIN skills s ON ss.skill_id = s.id 
+       WHERE ss.student_id = $1 AND ss.skill_type = 'TEACH'`,
+      [id]
+    );
+
+    const learnRes = await query(
+      `SELECT ss.*, s.name as skill_name, s.domain 
+       FROM student_skills ss 
+       JOIN skills s ON ss.skill_id = s.id 
+       WHERE ss.student_id = $1 AND ss.skill_type = 'LEARN'`,
+      [id]
+    );
+
+    const formattedStudent = {
+      id: updatedUser.id,
+      name: updatedUser.name,
+      studentId: updatedUser.student_id,
+      email: updatedUser.email,
+      avatar: updatedUser.avatar || updatedUser.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase(),
+      program: updatedUser.program,
+      specialization: updatedUser.specialization,
+      academicYear: updatedUser.academic_year,
+      graduationYear: updatedUser.graduation_year,
+      bio: updatedUser.bio,
+      targetDomain: updatedUser.target_domain,
+      targetRole: updatedUser.target_role,
+      careerGoal: updatedUser.career_goal,
+      availability: updatedUser.availability,
+      rating: parseFloat(updatedUser.rating) || 5.0,
+      ratingsCount: updatedUser.ratings_count || 0,
+      sessionsCompleted: updatedUser.sessions_completed || 0,
+      isVerified: updatedUser.is_verified,
+      role: updatedUser.role,
+      cgpa: updatedUser.cgpa,
+      skillsToTeach: teachRes.rows.map((r) => ({
+        skillId: r.skill_id,
+        skillName: r.skill_name,
+        domain: r.domain,
+        proficiency: r.proficiency,
+        experienceNote: r.experience_note,
+        verified: r.is_verified,
+        sessionsHelped: r.sessions_helped,
+        isAvailable: r.is_available
+      })),
+      skillsToLearn: learnRes.rows.map((r) => ({
+        skillId: r.skill_id,
+        skillName: r.skill_name,
+        domain: r.domain,
+        currentLevel: r.current_level,
+        targetLevel: r.target_level,
+        priority: r.priority
+      }))
+    };
+
+    return NextResponse.json({
+      success: true,
+      message: 'Student profile updated in database',
+      student: formattedStudent
+    });
+  } catch (error: any) {
+    console.error('Student PATCH error:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);

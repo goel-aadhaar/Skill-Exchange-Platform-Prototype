@@ -57,7 +57,7 @@ export const AdminPortalView: React.FC = () => {
   useEffect(() => {
     if (adminTab === 'repositories' || adminTab === 'dashboard') {
       fetch('/api/placements?limit=10').then(res => res.json()).then(data => {
-        if (data.jobs) setPlacements(data.jobs);
+        if (data.jobs || data.placements) setPlacements(data.jobs || data.placements);
         if (data.total) setTotalPlacements(data.total);
       });
       fetch('/api/internships?limit=10').then(res => res.json()).then(data => {

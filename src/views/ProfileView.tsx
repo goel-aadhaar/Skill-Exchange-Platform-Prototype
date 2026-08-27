@@ -45,9 +45,12 @@ export const ProfileView: React.FC = () => {
   if (currentUser.targetRole) score += 15;
   const completionPercent = Math.min(score, 100);
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    updateCurrentUser({
+    setIsSaving(true);
+    const success = await updateCurrentUser({
       ...currentUser,
       name,
       bio,
@@ -57,12 +60,21 @@ export const ProfileView: React.FC = () => {
       availability,
       specialization
     });
-    addToast({
-      type: 'success',
-      title: 'Profile Updated',
-      message: 'Your student preferences and profile details have been saved.'
-    });
-    setIsEditOpen(false);
+    setIsSaving(false);
+    if (success) {
+      addToast({
+        type: 'success',
+        title: 'Profile Updated',
+        message: 'Your student preferences and profile details have been saved in PostgreSQL.'
+      });
+      setIsEditOpen(false);
+    } else {
+      addToast({
+        type: 'error',
+        title: 'Save Failed',
+        message: 'Could not save profile changes to database. Please check connection.'
+      });
+    }
   };
 
   return (
@@ -320,9 +332,10 @@ export const ProfileView: React.FC = () => {
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-amber-400 hover:bg-amber-500 text-slate-900 font-extrabold rounded-xl shadow-xs"
+              disabled={isSaving}
+              className="px-5 py-2 bg-amber-400 hover:bg-amber-500 disabled:opacity-50 text-slate-900 font-extrabold rounded-xl shadow-xs transition-all flex items-center gap-1.5"
             >
-              Save Changes
+              <span>{isSaving ? 'Saving to Database...' : 'Save Changes'}</span>
             </button>
           </div>
         </form>

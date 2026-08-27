@@ -76,15 +76,21 @@ export async function GET(req: Request) {
       skillsRequired: r.skills_required
     }));
 
+    const sectorList = sectorsRes.rows.map((r) => r.sector);
+    const domainList = domainsRes.rows.map((r) => r.domain);
+
     return NextResponse.json({
       jobs: formattedJobs,
+      placements: formattedJobs,
       total,
       page,
       limit,
       totalPages: Math.ceil(total / limit),
+      sectors: sectorList,
+      domains: domainList,
       filters: {
-        sectors: sectorsRes.rows.map((r) => r.sector),
-        domains: domainsRes.rows.map((r) => r.domain)
+        sectors: sectorList,
+        domains: domainList
       }
     });
   } catch (error: any) {
