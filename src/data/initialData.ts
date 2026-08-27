@@ -1543,7 +1543,7 @@ export const INITIAL_REQUESTS: MentoringRequest[] = [
     status: 'Accepted',
     createdAt: '2026-08-25T14:20:00Z',
     acceptedAt: '2026-08-25T16:45:00Z',
-    mentorResponseNote: 'Looking forward to it Aadhaar! Have your PostgreSQL or DB Browser ready with the sample e-commerce dataset.',
+    mentorResponseNote: 'Looking forward to it! Have your SQL query editor ready with the sample e-commerce dataset.',
     sessionNotes: '-- Topic: Deloitte USI Business Analyst Mock Query Prep\n-- Problem 1: Find 2nd highest salary per department without subqueries\nSELECT emp_id, dept_id, salary, DENSE_RANK() OVER (PARTITION BY dept_id ORDER BY salary DESC) as rnk FROM employees WHERE rnk = 2;\n\n-- Problem 2: Month-over-month revenue growth using LAG()\nSELECT month, revenue, LAG(revenue, 1) OVER (ORDER BY month) as prev_rev, ROUND((revenue - LAG(revenue, 1) OVER (ORDER BY month)) * 100.0 / LAG(revenue, 1) OVER (ORDER BY month), 2) as growth_pct FROM monthly_sales;'
   },
   {

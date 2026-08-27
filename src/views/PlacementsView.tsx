@@ -3,12 +3,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useApp } from '../context/AppContext';
 import { PlacementJob, InternshipOpportunity } from '../types';
-import { Search, ChevronLeft, ChevronRight, X, Briefcase, Users, ArrowRight } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, X, Briefcase, Users, ArrowRight, Bookmark } from 'lucide-react';
 
 export const PlacementsView: React.FC = () => {
-  const { currentUser, setActiveTab, setSelectedSkillForMentorSearch, students } = useApp();
+  const { currentUser, setActiveTab, setSelectedSkillForMentorSearch, students, savedOpportunityIds, saveOpportunity, unsaveOpportunity } = useApp();
 
   const [activeSubTab, setActiveSubTab] = useState<'placements' | 'internships'>('placements');
+  const [viewFilter, setViewFilter] = useState<'all' | 'domain' | 'saved'>('all');
 
   // Placements state
   const [placementJobs, setPlacementJobs] = useState<PlacementJob[]>([]);
@@ -105,13 +106,12 @@ export const PlacementsView: React.FC = () => {
     return skillStr.split(',').map(s => s.trim()).filter(Boolean);
   };
 
-  const hasSkill = (skillName: string) => {
+  const getSkillStatus = (skillName: string): 'have' | 'learning' | 'missing' => {
     const teach = currentUser.skillsToTeach.some(s => s.skillName.toLowerCase() === skillName.toLowerCase());
-    const learnAndHasIt = currentUser.skillsToLearn.some(s => 
-      s.skillName.toLowerCase() === skillName.toLowerCase() && 
-      (s.currentLevel === 'Intermediate' || s.currentLevel === 'Advanced' || s.currentLevel === 'Expert')
-    );
-    return teach || learnAndHasIt;
+    if (teach) return 'have';
+    const learn = currentUser.skillsToLearn.some(s => s.skillName.toLowerCase() === skillName.toLowerCase());
+    if (learn) return 'learning';
+    return 'missing';
   };
 
   const countMentorsForSkill = (skillName: string) => {
@@ -130,7 +130,7 @@ export const PlacementsView: React.FC = () => {
     const reqSkillsStr = 'skillsRequired' in selectedJob ? (selectedJob as any).skillsRequired : '';
     const reqSkills = parseSkills(reqSkillsStr);
     
-    const missingSkills = reqSkills.filter(s => !hasSkill(s));
+    const missingSkills = reqSkills.filter(s => getSkillStatus(s) === 'missing');
     const location = 'locations' in selectedJob ? (selectedJob as any).locations : (selectedJob as any).location;
     
     return (
@@ -185,14 +185,18 @@ export const PlacementsView: React.FC = () => {
               <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Required Skills</h3>
               <div className="space-y-2 text-sm">
                 {reqSkills.length > 0 ? reqSkills.map(s => {
-                  const userHas = hasSkill(s);
+                  const status = getSkillStatus(s);
                   return (
                     <div key={s} className="flex items-center justify-between py-1 border-b border-slate-50 last:border-0">
                       <span className="font-medium text-slate-700">{s}</span>
-                      {userHas ? (
-                        <span className="text-emerald-600 font-bold">✓</span>
-                      ) : (
-                        <span className="text-rose-600 font-bold">✕</span>
+                      {status === 'have' && (
+                        <span className="text-emerald-600 font-bold">✅ Have</span>
+                      )}
+                      {status === 'learning' && (
+                        <span className="text-amber-500 font-bold">⚠️ Learning</span>
+                      )}
+                      {status === 'missing' && (
+                        <span className="text-rose-600 font-bold">❌ Missing</span>
                       )}
                     </div>
                   );
@@ -211,25 +215,21 @@ export const PlacementsView: React.FC = () => {
                 
                 <div className="space-y-2">
                   {missingSkills.map(s => {
-                    const mentorsCount = countMentorsForSkill(s);
-                    if (mentorsCount > 0) {
-                      return (
-                        <div key={s} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2 bg-white rounded border border-rose-100 text-sm">
-                          <span className="text-slate-700 font-medium">{mentorsCount} peers can teach {s}</span>
-                          <button
-                            onClick={() => {
-                              setSelectedJob(null);
-                              setSelectedSkillForMentorSearch(s);
-                              setActiveTab('find_mentor');
-                            }}
-                            className="text-xs font-bold text-white bg-[#0B192C] hover:bg-blue-900 px-3 py-1.5 rounded transition-colors whitespace-nowrap"
-                          >
-                            Find a peer
-                          </button>
-                        </div>
-                      );
-                    }
-                    return null;
+                    return (
+                      <div key={s} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2 bg-white rounded border border-rose-100 text-sm">
+                        <span className="text-slate-700 font-medium">Need help with {s}?</span>
+                        <button
+                          onClick={() => {
+                            setSelectedJob(null);
+                            setSelectedSkillForMentorSearch(s);
+                            setActiveTab('find_mentor');
+                          }}
+                          className="text-xs font-bold text-white bg-[#0B192C] hover:bg-blue-900 px-3 py-1.5 rounded transition-colors whitespace-nowrap"
+                        >
+                          Find a Mentor for this skill →
+                        </button>
+                      </div>
+                    );
                   })}
                 </div>
               </div>
@@ -276,6 +276,12 @@ export const PlacementsView: React.FC = () => {
         >
           Internships ({totalInternships || '...'})
         </button>
+      </div>
+
+      <div className="flex space-x-2 mb-4">
+        <button onClick={() => setViewFilter('all')} className={`px-4 py-1.5 rounded-full text-sm font-medium ${viewFilter === 'all' ? 'bg-[#0B192C] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>All</button>
+        <button onClick={() => setViewFilter('domain')} className={`px-4 py-1.5 rounded-full text-sm font-medium ${viewFilter === 'domain' ? 'bg-[#0B192C] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>My Domain</button>
+        <button onClick={() => setViewFilter('saved')} className={`px-4 py-1.5 rounded-full text-sm font-medium ${viewFilter === 'saved' ? 'bg-[#0B192C] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>Saved</button>
       </div>
 
       {activeSubTab === 'placements' && (
@@ -329,17 +335,33 @@ export const PlacementsView: React.FC = () => {
               <tbody className="text-sm divide-y divide-slate-100">
                 {isLoadingData && placementJobs.length === 0 ? (
                   <tr><td colSpan={5} className="px-4 py-8 text-center text-slate-500">Loading directory...</td></tr>
-                ) : placementJobs.map(job => (
+                ) : placementJobs.filter(job => {
+                  if (viewFilter === 'domain') return job.domain === currentUser.targetDomain;
+                  if (viewFilter === 'saved') return savedOpportunityIds.includes(String(job.id));
+                  return true;
+                }).map(job => {
+                  const isSaved = savedOpportunityIds.includes(String(job.id));
+                  return (
                   <tr key={job.id} className="hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => setSelectedJob(job)}>
                     <td className="px-4 py-3 align-middle font-medium text-slate-900">{job.companyName}</td>
                     <td className="px-4 py-3 align-middle">{job.role}</td>
                     <td className="px-4 py-3 align-middle hidden sm:table-cell text-slate-600">{job.domain}</td>
                     <td className="px-4 py-3 align-middle hidden md:table-cell text-slate-600">{job.location}</td>
-                    <td className="px-4 py-3 align-middle text-right">
+                    <td className="px-4 py-3 align-middle text-right flex items-center justify-end gap-3">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (isSaved) unsaveOpportunity(String(job.id));
+                          else saveOpportunity(String(job.id), 'PLACEMENT');
+                        }}
+                        className="text-slate-400 hover:text-rose-500 transition-colors"
+                      >
+                        <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-rose-500 text-rose-500' : ''}`} />
+                      </button>
                       <span className="text-[#0B192C] font-bold text-xs hover:underline">View Details</span>
                     </td>
                   </tr>
-                ))}
+                )})}
                 {!isLoadingData && placementJobs.length === 0 && (
                   <tr><td colSpan={5} className="px-4 py-8 text-center text-slate-500">No placements found.</td></tr>
                 )}
@@ -400,16 +422,31 @@ export const PlacementsView: React.FC = () => {
               <tbody className="text-sm divide-y divide-slate-100">
                 {isLoadingData && internships.length === 0 ? (
                   <tr><td colSpan={4} className="px-4 py-8 text-center text-slate-500">Loading directory...</td></tr>
-                ) : internships.map(job => (
+                ) : internships.filter(job => {
+                  if (viewFilter === 'saved') return savedOpportunityIds.includes(String(job.id));
+                  return true;
+                }).map(job => {
+                  const isSaved = savedOpportunityIds.includes(String(job.id));
+                  return (
                   <tr key={job.id} className="hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => setSelectedJob(job)}>
                     <td className="px-4 py-3 align-middle font-medium text-slate-900">{job.companyName}</td>
                     <td className="px-4 py-3 align-middle">{job.role}</td>
                     <td className="px-4 py-3 align-middle hidden md:table-cell text-slate-600">{(job as any).locations}</td>
-                    <td className="px-4 py-3 align-middle text-right">
+                    <td className="px-4 py-3 align-middle text-right flex items-center justify-end gap-3">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (isSaved) unsaveOpportunity(String(job.id));
+                          else saveOpportunity(String(job.id), 'INTERNSHIP');
+                        }}
+                        className="text-slate-400 hover:text-rose-500 transition-colors"
+                      >
+                        <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-rose-500 text-rose-500' : ''}`} />
+                      </button>
                       <span className="text-[#0B192C] font-bold text-xs hover:underline">View Details</span>
                     </td>
                   </tr>
-                ))}
+                )})}
                 {!isLoadingData && internships.length === 0 && (
                   <tr><td colSpan={4} className="px-4 py-8 text-center text-slate-500">No internships found.</td></tr>
                 )}

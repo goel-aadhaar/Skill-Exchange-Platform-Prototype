@@ -191,6 +191,29 @@ export async function initializeDatabase() {
     );
   `);
 
+  // 11. Saved Mentors Table
+  await query(`
+    CREATE TABLE IF NOT EXISTS saved_mentors (
+      id VARCHAR(100) PRIMARY KEY,
+      student_id VARCHAR(100) REFERENCES users(id) ON DELETE CASCADE,
+      mentor_id VARCHAR(100) REFERENCES users(id) ON DELETE CASCADE,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(student_id, mentor_id)
+    );
+  `);
+
+  // 12. Saved Opportunities Table
+  await query(`
+    CREATE TABLE IF NOT EXISTS saved_opportunities (
+      id VARCHAR(100) PRIMARY KEY,
+      student_id VARCHAR(100) REFERENCES users(id) ON DELETE CASCADE,
+      opportunity_id VARCHAR(100) NOT NULL,
+      opportunity_type VARCHAR(20) CHECK (opportunity_type IN ('PLACEMENT', 'INTERNSHIP')),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(student_id, opportunity_id)
+    );
+  `);
+
   // Create Indexes
   await query(`CREATE INDEX IF NOT EXISTS idx_users_student_id ON users(student_id);`);
   await query(`CREATE INDEX IF NOT EXISTS idx_student_skills_student_id ON student_skills(student_id);`);

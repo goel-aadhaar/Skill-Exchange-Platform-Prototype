@@ -32,7 +32,7 @@ export const SessionWorkspaceModal: React.FC<SessionWorkspaceModalProps> = ({
   request,
   onCompleteAndRate
 }) => {
-  const { currentUser } = useApp();
+  const { currentUser, completeMentoringSession } = useApp();
 
   const [isMicOn, setIsMicOn] = useState(true);
   const [isVideoOn, setIsVideoOn] = useState(true);
@@ -178,7 +178,7 @@ export const SessionWorkspaceModal: React.FC<SessionWorkspaceModalProps> = ({
               </label>
             </div>
             <span className="text-[11px] text-slate-500">
-              Auto-syncing with {otherName}
+              Your personal session notes
             </span>
           </div>
 
@@ -207,7 +207,8 @@ export const SessionWorkspaceModal: React.FC<SessionWorkspaceModalProps> = ({
             </button>
             <button
               type="button"
-              onClick={() => {
+              onClick={async () => {
+                await completeMentoringSession(request.id, sessionNotes);
                 onClose();
                 onCompleteAndRate(request);
               }}

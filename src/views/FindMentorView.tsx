@@ -14,7 +14,10 @@ export const FindMentorView: React.FC = () => {
     selectedSkillForMentorSearch,
     setSelectedSkillForMentorSearch,
     setSelectedMentorForModal,
-    openRequestModal
+    openRequestModal,
+    savedMentorIds,
+    saveMentor,
+    unsaveMentor
   } = useApp();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -23,6 +26,7 @@ export const FindMentorView: React.FC = () => {
   const [minRating, setMinRating] = useState<number>(0);
   const [verifiedOnly, setVerifiedOnly] = useState<boolean>(false);
   const [selectedProficiency, setSelectedProficiency] = useState<string>('all');
+  const [showSavedOnly, setShowSavedOnly] = useState<boolean>(false);
 
   useEffect(() => {
     if (selectedSkillForMentorSearch) {
@@ -33,6 +37,7 @@ export const FindMentorView: React.FC = () => {
   const filteredMentors = students.filter((st) => {
     if (st.id === currentUser.id || st.role === 'admin') return false;
     if (st.skillsToTeach.length === 0) return false;
+    if (showSavedOnly && !savedMentorIds.includes(st.id)) return false;
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -44,8 +49,9 @@ export const FindMentorView: React.FC = () => {
 
     if (selectedSkill !== 'all') {
       const hasSkill = st.skillsToTeach.some(
-        (s) => s.skillName.toLowerCase().includes(selectedSkill.toLowerCase()) ||
-               selectedSkill.toLowerCase().includes(s.skillName.toLowerCase())
+        (s) => (s.skillName.toLowerCase().includes(selectedSkill.toLowerCase()) ||
+               selectedSkill.toLowerCase().includes(s.skillName.toLowerCase())) &&
+               s.isAvailable !== false
       );
       if (!hasSkill) return false;
     }
@@ -154,7 +160,7 @@ export const FindMentorView: React.FC = () => {
             </select>
           </div>
 
-          <div className="flex items-center pt-5">
+          <div className="flex flex-col pt-5 gap-2">
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -163,6 +169,15 @@ export const FindMentorView: React.FC = () => {
                 className="rounded border-slate-300 text-[#0B192C] focus:ring-[#0B192C]"
               />
               <span className="text-xs font-semibold text-slate-700">Verified Only</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showSavedOnly}
+                onChange={(e) => setShowSavedOnly(e.target.checked)}
+                className="rounded border-slate-300 text-[#0B192C] focus:ring-[#0B192C]"
+              />
+              <span className="text-xs font-semibold text-slate-700">Saved Mentors</span>
             </label>
           </div>
           
@@ -183,6 +198,8 @@ export const FindMentorView: React.FC = () => {
             onViewProfile={(m) => setSelectedMentorForModal(m)}
             onRequestMentor={(m, skill) => openRequestModal(m, skill)}
             highlightSkill={selectedSkill !== 'all' ? selectedSkill : null}
+            isSaved={savedMentorIds.includes(mentor.id)}
+            onToggleSave={(m) => savedMentorIds.includes(m.id) ? unsaveMentor(m.id) : saveMentor(m.id)}
           />
         ))}
         {filteredMentors.length === 0 && (

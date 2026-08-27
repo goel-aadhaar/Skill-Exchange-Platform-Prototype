@@ -2,20 +2,24 @@ import React from 'react';
 import { Student } from '../../types';
 import { Badge } from '../common/Badge';
 import { StarRating } from '../common/StarRating';
-import { Clock, ArrowRight } from 'lucide-react';
+import { Clock, ArrowRight, Bookmark } from 'lucide-react';
 
 interface MentorCardProps {
   mentor: Student;
   onViewProfile: (mentor: Student) => void;
   onRequestMentor: (mentor: Student, skillName?: string) => void;
   highlightSkill?: string | null;
+  isSaved?: boolean;
+  onToggleSave?: (mentor: Student) => void;
 }
 
 export const MentorCard: React.FC<MentorCardProps> = ({
   mentor,
   onViewProfile,
   onRequestMentor,
-  highlightSkill
+  highlightSkill,
+  isSaved,
+  onToggleSave
 }) => {
   const highlightSkillObj = highlightSkill
     ? mentor.skillsToTeach.find(s => s.skillName.toLowerCase().includes(highlightSkill.toLowerCase()))
@@ -76,6 +80,19 @@ export const MentorCard: React.FC<MentorCardProps> = ({
         </div>
 
         <div className="flex flex-row items-center justify-end gap-2 shrink-0">
+          {onToggleSave && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleSave(mentor);
+              }}
+              className="p-2 text-slate-400 hover:text-blue-600 transition-colors"
+              title={isSaved ? "Remove from saved mentors" : "Save mentor"}
+            >
+              <Bookmark className="w-5 h-5" fill={isSaved ? "currentColor" : "none"} />
+            </button>
+          )}
           <button
             type="button"
             onClick={() => onViewProfile(mentor)}
@@ -85,11 +102,12 @@ export const MentorCard: React.FC<MentorCardProps> = ({
           </button>
           <button
             type="button"
-            onClick={() => onRequestMentor(mentor, primarySkill?.skillName)}
-            className="text-xs font-bold text-white bg-[#0B192C] hover:bg-blue-900 px-4 py-2 rounded flex items-center gap-1 transition-colors"
+            onClick={() => primarySkill?.isAvailable !== false && onRequestMentor(mentor, primarySkill?.skillName)}
+            disabled={primarySkill?.isAvailable === false}
+            className={`text-xs font-bold text-white px-4 py-2 rounded flex items-center gap-1 transition-colors ${primarySkill?.isAvailable === false ? 'bg-slate-400 cursor-not-allowed' : 'bg-[#0B192C] hover:bg-blue-900'}`}
           >
-            <span>Request Mentoring</span>
-            <ArrowRight className="w-3 h-3" />
+            <span>{primarySkill?.isAvailable === false ? 'Currently Unavailable' : 'Request Mentoring'}</span>
+            {primarySkill?.isAvailable !== false && <ArrowRight className="w-3 h-3" />}
           </button>
         </div>
       </div>

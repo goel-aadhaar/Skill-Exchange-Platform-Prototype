@@ -16,10 +16,15 @@ export async function POST(req: Request) {
     );
 
     if (rows.length === 0) {
-      return NextResponse.json({ error: 'Student account not found in IMT Hyderabad database' }, { status: 404 });
+      return NextResponse.json({ error: 'Account not found. Please check your Student ID or email.' }, { status: 404 });
     }
 
     const user = rows[0];
+
+    // Verify password
+    if (password && user.password_hash && password !== user.password_hash) {
+      return NextResponse.json({ error: 'Incorrect password. Please try again.' }, { status: 401 });
+    }
 
     // Fetch teaching skills
     const teachSkillsRes = await query(
@@ -83,6 +88,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true, user: formattedUser });
   } catch (error: any) {
     console.error('Login API error:', error);
-    return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });
   }
 }

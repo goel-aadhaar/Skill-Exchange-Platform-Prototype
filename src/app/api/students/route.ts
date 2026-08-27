@@ -28,10 +28,10 @@ export async function POST(req: Request) {
        specialization = EXCLUDED.specialization, academic_year = EXCLUDED.academic_year, graduation_year = EXCLUDED.graduation_year;`,
       [name, email, studentId, program || null, specialization || null, academicYear || null, graduationYear || null]
     );
-    return NextResponse.json({ success: true, message: 'Student record saved' });
+    return NextResponse.json({ success: true, message: 'Profile saved successfully' });
   } catch (error: any) {
     console.error('Student POST error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });
   }
 }
 
@@ -72,7 +72,7 @@ export async function PATCH(req: Request) {
     } = parseResult.data;
 
     // Verify user exists
-    const { rows: userRows } = await query(`SELECT * FROM users WHERE id = $1`, [id]);
+    const { rows: userRows } = await query(`SELECT id, name, student_id, email, avatar, program, specialization, academic_year, graduation_year, bio, target_domain, target_role, career_goal, availability, rating, ratings_count, sessions_completed, is_verified, role, cgpa, linkedin_url, github_url, created_at, updated_at FROM users WHERE id = $1`, [id]);
     if (userRows.length === 0) {
       return NextResponse.json({ error: 'Student account not found' }, { status: 404 });
     }
@@ -110,7 +110,7 @@ export async function PATCH(req: Request) {
     );
 
     // Fetch updated student with all skills
-    const { rows: updatedRows } = await query(`SELECT * FROM users WHERE id = $1`, [id]);
+    const { rows: updatedRows } = await query(`SELECT id, name, student_id, email, avatar, program, specialization, academic_year, graduation_year, bio, target_domain, target_role, career_goal, availability, rating, ratings_count, sessions_completed, is_verified, role, cgpa, linkedin_url, github_url, created_at, updated_at FROM users WHERE id = $1`, [id]);
     const updatedUser = updatedRows[0];
 
     const teachRes = await query(
@@ -172,12 +172,12 @@ export async function PATCH(req: Request) {
 
     return NextResponse.json({
       success: true,
-      message: 'Student profile updated in database',
+      message: 'Profile updated successfully',
       student: formattedStudent
     });
   } catch (error: any) {
     console.error('Student PATCH error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });
   }
 }
 
@@ -191,7 +191,7 @@ export async function GET(req: Request) {
     const studentId = searchParams.get('studentId');
 
     if (studentId) {
-      const { rows } = await query(`SELECT * FROM users WHERE id = $1 LIMIT 1`, [studentId]);
+      const { rows } = await query(`SELECT id, name, student_id, email, avatar, program, specialization, academic_year, graduation_year, bio, target_domain, target_role, career_goal, availability, rating, ratings_count, sessions_completed, is_verified, role, cgpa, linkedin_url, github_url, created_at, updated_at FROM users WHERE id = $1 LIMIT 1`, [studentId]);
       if (rows.length === 0) {
         return NextResponse.json({ error: 'Student not found' }, { status: 404 });
       }
@@ -247,7 +247,7 @@ export async function GET(req: Request) {
     }
 
     // Query all students
-    const { rows: users } = await query(`SELECT * FROM users WHERE role = 'student' ORDER BY rating DESC, name ASC`);
+    const { rows: users } = await query(`SELECT id, name, student_id, email, avatar, program, specialization, academic_year, graduation_year, bio, target_domain, target_role, career_goal, availability, rating, ratings_count, sessions_completed, is_verified, role, cgpa, linkedin_url, github_url, created_at, updated_at FROM users WHERE role = 'student' ORDER BY rating DESC, name ASC`);
 
     // Fetch all student skills in batch
     const { rows: allSkills } = await query(`
@@ -322,6 +322,6 @@ export async function GET(req: Request) {
     return NextResponse.json({ students: filtered });
   } catch (error: any) {
     console.error('Students API error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });
   }
 }

@@ -22,7 +22,7 @@ export const DemoTourGuide: React.FC = () => {
     {
       id: 's1',
       title: '1. Learner Flow: Tushar (25A3HP658) requests Oshi',
-      desc: 'Log in as Tushar Goel (1st Yr) → see missing Python/SQL gaps → find Oshi Shrivastava (Deloitte PPO) → send real DB request.',
+      desc: 'Log in as Tushar Goel (1st Yr) → see missing Python/SQL gaps → find Oshi Shrivastava (Deloitte PPO) → send a mentoring request.',
       action: async () => {
         await switchPersona('25A3HP658');
         setActiveTab('dashboard');
@@ -31,7 +31,7 @@ export const DemoTourGuide: React.FC = () => {
     {
       id: 's2',
       title: '2. Mentor Flow: Oshi (25A3HP651) accepts request',
-      desc: 'Log in as Oshi Shrivastava → check live incoming request from Tushar in PostgreSQL → Accept with Meet link.',
+      desc: 'Log in as Oshi Shrivastava → check the incoming request from Tushar → Accept with a Meet link.',
       action: async () => {
         await switchPersona('25A3HP651');
         setActiveTab('my_requests');
@@ -82,7 +82,7 @@ export const DemoTourGuide: React.FC = () => {
                 </h4>
                 <p className="text-[10px] text-slate-500 flex items-center gap-1">
                   <Database className="w-2.5 h-2.5 text-emerald-600" />
-                  Live Neon PostgreSQL Workflows
+                  Live Platform Workflows
                 </p>
               </div>
             </div>
@@ -125,7 +125,7 @@ export const DemoTourGuide: React.FC = () => {
           </div>
 
           <div className="text-[10px] text-slate-400 text-center pt-1 border-t border-slate-100">
-            Clicking a scenario executes a database-backed session switch & screen transition.
+            Clicking a scenario switches your account and navigates to the relevant screen.
           </div>
         </div>
       )}

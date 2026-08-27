@@ -13,7 +13,8 @@ export const MySkillsView: React.FC = () => {
     addLearningSkill, 
     removeTeachingSkill, 
     removeLearningSkill,
-    submitSkillVerification
+    submitSkillVerification,
+    toggleSkillAvailability
   } = useApp();
 
   const [activeSubTab, setActiveSubTab] = useState<'teach' | 'learn'>('teach');
@@ -126,18 +127,21 @@ export const MySkillsView: React.FC = () => {
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               Your Teaching Portfolio
             </span>
-            <button
-              onClick={() => {
-                if (currentUser.skillsToTeach.length > 0) {
-                  setVerifSkillId(currentUser.skillsToTeach[0].skillId);
-                  setIsVerifyOpen(true);
-                }
-              }}
-              className="text-xs font-bold text-emerald-700 hover:underline flex items-center gap-1"
-            >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              Verify a Skill
-            </button>
+            {currentUser.skillsToTeach.filter(s => !s.verified).length > 0 && (
+              <button
+                onClick={() => {
+                  const unverified = currentUser.skillsToTeach.filter(s => !s.verified);
+                  if (unverified.length > 0) {
+                    setVerifSkillId(unverified[0].skillId);
+                    setIsVerifyOpen(true);
+                  }
+                }}
+                className="text-xs font-bold text-emerald-700 hover:underline flex items-center gap-1"
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                Verify a Skill
+              </button>
+            )}
           </div>
 
           <div className="bg-white border border-slate-200 rounded overflow-hidden">
@@ -147,6 +151,7 @@ export const MySkillsView: React.FC = () => {
                   <th className="px-4 py-3 font-semibold">Skill</th>
                   <th className="px-4 py-3 font-semibold">Proficiency</th>
                   <th className="px-4 py-3 font-semibold">Status</th>
+                  <th className="px-4 py-3 font-semibold">Availability</th>
                   <th className="px-4 py-3 font-semibold hidden md:table-cell">Students Helped</th>
                   <th className="px-4 py-3 font-semibold text-right">Action</th>
                 </tr>
@@ -172,6 +177,18 @@ export const MySkillsView: React.FC = () => {
                         </span>
                       )}
                     </td>
+                    <td className="px-4 py-3 align-middle">
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="sr-only peer"
+                          checked={st.isAvailable}
+                          onChange={(e) => toggleSkillAvailability(st.skillId, e.target.checked)}
+                        />
+                        <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                        <span className="ml-2 text-xs font-medium text-slate-700">{st.isAvailable ? 'Accepting' : 'Paused'}</span>
+                      </label>
+                    </td>
                     <td className="px-4 py-3 align-middle hidden md:table-cell text-slate-600">
                       {st.sessionsHelped} sessions
                     </td>
@@ -189,7 +206,7 @@ export const MySkillsView: React.FC = () => {
                 
                 {currentUser.skillsToTeach.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-4 py-8 text-center text-slate-500 text-sm">
+                    <td colSpan={6} className="px-4 py-8 text-center text-slate-500 text-sm">
                       You haven't added any skills to teach yet. Share your expertise with peers!
                     </td>
                   </tr>
@@ -283,7 +300,7 @@ export const MySkillsView: React.FC = () => {
             onClick={handleAddTeach}
             className="w-full bg-[#0B192C] hover:bg-blue-900 disabled:opacity-50 text-white py-2 rounded text-sm font-bold transition-colors"
           >
-            {isSubmitting ? 'Saving to Database...' : 'Add Skill'}
+            {isSubmitting ? 'Saving...' : 'Add Skill'}
           </button>
         </div>
       </Modal>
@@ -317,34 +334,40 @@ export const MySkillsView: React.FC = () => {
             onClick={handleAddLearn}
             className="w-full bg-[#0B192C] hover:bg-blue-900 disabled:opacity-50 text-white py-2 rounded text-sm font-bold transition-colors"
           >
-            {isSubmitting ? 'Saving to Database...' : 'Add Goal'}
+            {isSubmitting ? 'Saving...' : 'Add Goal'}
           </button>
         </div>
       </Modal>
 
       <Modal isOpen={isVerifyOpen} onClose={() => setIsVerifyOpen(false)} title="Verify Skill Badge">
-        <div className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Select Skill to Verify</label>
-            <select value={verifSkillId} onChange={e => setVerifSkillId(e.target.value)} className="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:ring-[#0B192C]">
-              {currentUser.skillsToTeach.filter(s => !s.verified).map(s => (
-                <option key={s.skillId} value={s.skillId}>{s.skillName}</option>
-              ))}
-            </select>
+        {currentUser.skillsToTeach.filter(s => !s.verified).length === 0 ? (
+          <div className="p-4 text-center text-slate-500 text-sm">
+            All your teaching skills are already verified.
           </div>
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1">Evidence / Proof</label>
-            <textarea value={verifNote} onChange={e => setVerifNote(e.target.value)} placeholder="Provide link to certification, project repo, or explanation..." className="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:ring-[#0B192C] h-24" />
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Select Skill to Verify</label>
+              <select value={verifSkillId} onChange={e => setVerifSkillId(e.target.value)} className="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:ring-[#0B192C]">
+                {currentUser.skillsToTeach.filter(s => !s.verified).map(s => (
+                  <option key={s.skillId} value={s.skillId}>{s.skillName}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">Evidence / Proof</label>
+              <textarea value={verifNote} onChange={e => setVerifNote(e.target.value)} placeholder="Provide link to certification, project repo, or explanation..." className="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:ring-[#0B192C] h-24" />
+            </div>
+            <button
+              type="button"
+              disabled={isSubmitting}
+              onClick={handleVerify}
+              className="w-full bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white py-2 rounded text-sm font-bold transition-colors"
+            >
+              {isSubmitting ? 'Submitting to Placement Cell...' : 'Submit for Verification'}
+            </button>
           </div>
-          <button
-            type="button"
-            disabled={isSubmitting}
-            onClick={handleVerify}
-            className="w-full bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white py-2 rounded text-sm font-bold transition-colors"
-          >
-            {isSubmitting ? 'Submitting to Placement Cell...' : 'Submit for Verification'}
-          </button>
-        </div>
+        )}
       </Modal>
 
     </div>

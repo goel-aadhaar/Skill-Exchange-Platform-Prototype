@@ -774,7 +774,7 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ onGoToLogin }) => {
                 disabled={isSubmitting}
                 className="px-6 py-2.5 bg-amber-400 hover:bg-amber-500 text-slate-900 font-black rounded-xl shadow-md text-xs transition-all flex items-center gap-1.5 cursor-pointer"
               >
-                <span>{isSubmitting ? 'Registering in IMT Database...' : 'Complete Profile & Enter Platform'}</span>
+                <span>{isSubmitting ? 'Creating your profile...' : 'Complete Profile & Enter Platform'}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>

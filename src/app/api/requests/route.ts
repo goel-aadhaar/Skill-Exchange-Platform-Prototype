@@ -64,7 +64,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ requests: formattedRequests });
   } catch (error: any) {
     console.error('Requests GET error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });
   }
 }
 
@@ -123,7 +123,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true, requestId, message: 'Mentoring request submitted successfully' });
   } catch (error: any) {
     console.error('Requests POST error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });
   }
 }
 
@@ -225,6 +225,6 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ success: true, message: `Request status updated to ${status}` });
   } catch (error: any) {
     console.error('Requests PATCH error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });
   }
 }

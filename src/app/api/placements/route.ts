@@ -10,7 +10,8 @@ export async function GET(req: Request) {
     const location = searchParams.get('location') || '';
     const page = parseInt(searchParams.get('page') || '1', 10);
     const limit = parseInt(searchParams.get('limit') || '20', 10);
-    const offset = (page - 1) * limit;
+    const safePage = Math.max(1, page);
+    const offset = (safePage - 1) * limit;
 
     let whereClauses: string[] = [];
     let params: any[] = [];
@@ -95,6 +96,6 @@ export async function GET(req: Request) {
     });
   } catch (error: any) {
     console.error('Placements API error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });
   }
 }

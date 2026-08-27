@@ -145,7 +145,7 @@ export const AdminPortalView: React.FC = () => {
           className="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-rose-50 hover:text-rose-700 rounded transition-colors flex items-center gap-1.5 self-start sm:self-auto border border-slate-300"
         >
           <RotateCcw className="w-3.5 h-3.5" />
-          <span>Re-seed Database</span>
+          <span>Refresh Data</span>
         </button>
       </div>
 

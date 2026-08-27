@@ -171,13 +171,13 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: true,
-      message: 'Account successfully registered in IMT Hyderabad database.',
+      message: 'Account registered successfully!',
       user: formattedUser
     });
   } catch (error: any) {
     console.error('Registration API error:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to register student account' },
+      { error: 'Registration failed. Please try again.' },
       { status: 500 }
     );
   }

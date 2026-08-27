@@ -45,7 +45,7 @@ export async function GET() {
     return NextResponse.json({ skills: formattedSkills, domains: formattedDomains });
   } catch (error: any) {
     console.error('Skills API error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });
   }
 }
 
@@ -92,7 +92,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true, message: 'Skill updated successfully' });
   } catch (error: any) {
     console.error('Skill POST error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });
   }
 }
 
@@ -115,6 +115,26 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ success: true, message: 'Skill removed successfully' });
   } catch (error: any) {
     console.error('Skill DELETE error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });
+  }
+}
+
+export async function PATCH(req: Request) {
+  try {
+    const { studentId, skillId, isAvailable } = await req.json();
+
+    if (!studentId || !skillId || isAvailable === undefined) {
+      return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
+    }
+
+    await query(
+      `UPDATE student_skills SET is_available = $1 WHERE student_id = $2 AND skill_id = $3 AND skill_type = 'TEACH'`,
+      [isAvailable, studentId, skillId]
+    );
+
+    return NextResponse.json({ success: true, message: 'Skill availability updated successfully' });
+  } catch (error: any) {
+    console.error('Skill PATCH error:', error);
+    return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });
   }
 }

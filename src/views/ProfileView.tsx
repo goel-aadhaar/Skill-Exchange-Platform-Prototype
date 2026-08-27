@@ -38,11 +38,15 @@ export const ProfileView: React.FC = () => {
 
   const myReviews = ratings.filter((r) => r.mentorId === currentUser.id);
 
-  let score = 30;
-  if (currentUser.bio && currentUser.bio.length > 20) score += 15;
-  if (currentUser.skillsToTeach.length > 0) score += 20;
-  if (currentUser.skillsToLearn.length > 0) score += 20;
-  if (currentUser.targetRole) score += 15;
+  let score = 20;
+  if (currentUser.bio && currentUser.bio.length >= 10) score += 10;
+  if (currentUser.targetRole && currentUser.careerGoal) score += 10;
+  if (currentUser.cgpa) score += 5;
+  if (currentUser.linkedinUrl) score += 5;
+  if (currentUser.skillsToTeach && currentUser.skillsToTeach.length >= 1) score += 15;
+  if (currentUser.skillsToLearn && currentUser.skillsToLearn.length >= 1) score += 15;
+  if (currentUser.sessionsCompleted && currentUser.sessionsCompleted >= 1) score += 10;
+  if (currentUser.avatar) score += 10;
   const completionPercent = Math.min(score, 100);
 
   const [isSaving, setIsSaving] = useState(false);
@@ -65,14 +69,14 @@ export const ProfileView: React.FC = () => {
       addToast({
         type: 'success',
         title: 'Profile Updated',
-        message: 'Your student preferences and profile details have been saved in PostgreSQL.'
+        message: 'Your profile has been updated successfully.'
       });
       setIsEditOpen(false);
     } else {
       addToast({
         type: 'error',
         title: 'Save Failed',
-        message: 'Could not save profile changes to database. Please check connection.'
+        message: 'Could not save your changes. Please try again.'
       });
     }
   };
@@ -81,7 +85,7 @@ export const ProfileView: React.FC = () => {
     <div className="space-y-6 pb-12 animate-in fade-in duration-150">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
-        <div>
+        <div className="flex-1 max-w-xl">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-xl bg-[#0F2942] text-amber-400 border border-amber-400/40 flex items-center justify-center font-bold shadow-xs">
               <User className="w-4 h-4" />
@@ -93,6 +97,18 @@ export const ProfileView: React.FC = () => {
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
             Personal academic record, mentorship ratings, and career preference details at IMT Hyderabad.
           </p>
+          <div className="mt-3">
+            <div className="flex justify-between items-center text-xs mb-1">
+              <span className="font-semibold text-slate-700">Profile Completion</span>
+              <span className="font-bold text-slate-900">{completionPercent}%</span>
+            </div>
+            <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-[#0F2942] rounded-full transition-all duration-500"
+                style={{ width: `${completionPercent}%` }}
+              ></div>
+            </div>
+          </div>
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
@@ -335,7 +351,7 @@ export const ProfileView: React.FC = () => {
               disabled={isSaving}
               className="px-5 py-2 bg-amber-400 hover:bg-amber-500 disabled:opacity-50 text-slate-900 font-extrabold rounded-xl shadow-xs transition-all flex items-center gap-1.5"
             >
-              <span>{isSaving ? 'Saving to Database...' : 'Save Changes'}</span>
+              <span>{isSaving ? 'Saving changes...' : 'Save Changes'}</span>
             </button>
           </div>
         </form>

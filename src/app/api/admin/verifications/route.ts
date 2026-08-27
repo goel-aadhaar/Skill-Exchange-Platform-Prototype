@@ -37,7 +37,7 @@ export async function GET() {
     return NextResponse.json({ verifications: formatted });
   } catch (error: any) {
     console.error('Admin Verifications GET error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });
   }
 }
 
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true, message: 'Verification request submitted to Placement Cell' });
   } catch (error: any) {
     console.error('Admin Verifications POST error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });
   }
 }
 
@@ -125,6 +125,6 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ success: true, message: `Verification claim marked as ${status}` });
   } catch (error: any) {
     console.error('Admin Verifications PATCH error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: 'Something went wrong. Please try again.' }, { status: 500 });
   }
 }

@@ -28,8 +28,8 @@ export const LoginView: React.FC<LoginViewProps> = ({ onGoToRegister }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!identifier.trim()) return;
-    await loginWithStudentId(identifier.trim());
+    if (!identifier.trim() || !password.trim()) return;
+    await loginWithStudentId(identifier.trim(), password.trim());
   };
 
   const demoAccounts = [
@@ -127,7 +127,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onGoToRegister }) => {
             <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-2xs space-y-1">
               <div className="flex items-center gap-2 text-xs font-bold text-[#0F2942]">
                 <Database className="w-4 h-4 text-blue-600" />
-                <span>Live Neon PostgreSQL</span>
+                <span>Live Platform</span>
               </div>
               <p className="text-[11px] text-slate-500">
                 Real multi-user peer mentoring requests with persistent database synchronization.
@@ -187,7 +187,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ onGoToRegister }) => {
               disabled={isLoading}
               className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-slate-900 bg-amber-400 hover:bg-amber-500 shadow-md transition-all flex items-center justify-center gap-2"
             >
-              <span>{isLoading ? 'Verifying with PostgreSQL...' : 'Sign In to Skill Exchange'}</span>
+              <span>{isLoading ? 'Signing in...' : 'Sign In to Skill Exchange'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
 

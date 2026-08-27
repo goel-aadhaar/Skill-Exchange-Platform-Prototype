@@ -100,7 +100,7 @@ export const DemoSwitcher: React.FC = () => {
                   Live IMT Hyderabad Personas
                 </div>
                 <p className="text-[11px] text-slate-500">
-                  Switch accounts to test real-time database peer mentoring
+                  Switch accounts to test peer mentoring across profiles
                 </p>
               </div>
             </div>
@@ -152,7 +152,7 @@ export const DemoSwitcher: React.FC = () => {
                 className="w-full px-3 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-rose-50 hover:text-rose-700 rounded-xl transition-colors flex items-center justify-center gap-1.5"
               >
                 <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
-                <span>Re-seed Neon PostgreSQL (226 JDs & 75 SIPs)</span>
+                <span>Refresh Platform Data (226 JDs & 75 SIPs)</span>
               </button>
             </div>
           </div>

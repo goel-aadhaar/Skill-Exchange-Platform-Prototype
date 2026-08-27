@@ -62,15 +62,7 @@ export const DomainsView: React.FC = () => {
     (sk) => sk.domain.toLowerCase() === activeDomain.name.toLowerCase() || (activeDomain.keySkills && activeDomain.keySkills.includes(sk.name))
   );
 
-  const domainMentors = students.filter(
-    (st) =>
-      st.role !== 'admin' &&
-      st.skillsToTeach.some(
-        (s) =>
-          s.domain.toLowerCase() === activeDomain.name.toLowerCase() ||
-          (activeDomain.keySkills && activeDomain.keySkills.includes(s.skillName))
-      )
-  );
+
 
   return (
     <div className="space-y-6 pb-12 animate-in fade-in duration-150">

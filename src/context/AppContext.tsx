@@ -39,6 +39,7 @@ interface AppContextType {
   unreadNotifsCount: number;
   toasts: ToastMessage[];
   isLoading: boolean;
+  savedMentorIds: string[];
 
   // Modals & Navigation
   selectedMentorForModal: Student | null;
@@ -57,9 +58,11 @@ interface AppContextType {
   setSelectedSkillForMentorSearch: (skillName: string | null) => void;
   addToast: (toast: Omit<ToastMessage, 'id'>) => void;
   removeToast: (id: string) => void;
+  saveMentor: (id: string) => Promise<void>;
+  unsaveMentor: (id: string) => Promise<void>;
 
   // Auth & Persona
-  loginWithStudentId: (studentIdOrEmail: string) => Promise<boolean>;
+  loginWithStudentId: (studentIdOrEmail: string, password?: string) => Promise<boolean>;
   registerUser: (data: {
     name: string;
     studentId: string;
@@ -113,6 +116,10 @@ interface AppContextType {
   markNotificationAsRead: (id: string) => Promise<void>;
   markAllNotificationsAsRead: () => Promise<void>;
   refreshAllData: () => Promise<void>;
+  toggleSkillAvailability: (skillId: string, isAvailable: boolean) => Promise<boolean>;
+  savedOpportunityIds: string[];
+  saveOpportunity: (id: string, type: 'PLACEMENT' | 'INTERNSHIP') => Promise<void>;
+  unsaveOpportunity: (id: string) => Promise<void>;
 }
 
 const DEFAULT_USER: Student = {
@@ -170,6 +177,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [savedMentorIds, setSavedMentorIds] = useState<string[]>([]);
+  const [savedOpportunityIds, setSavedOpportunityIds] = useState<string[]>([]);
 
   // Modal states
   const [selectedMentorForModal, setSelectedMentorForModal] = useState<Student | null>(null);
@@ -297,6 +306,98 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   }, []);
 
+  // Fetch Saved Opportunities
+  const fetchSavedOpportunities = useCallback(async (targetUserId?: string) => {
+    try {
+      const uId = targetUserId || currentUserIdRef.current;
+      if (!uId) return;
+
+      const res = await fetch(`/api/saved-opportunities?studentId=${uId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setSavedOpportunityIds(data.savedOpportunityIds || []);
+      }
+    } catch (err) {
+      console.error('Error fetching saved opportunities:', err);
+    }
+  }, []);
+
+  const saveOpportunity = async (id: string, type: 'PLACEMENT' | 'INTERNSHIP') => {
+    try {
+      const res = await fetch('/api/saved-opportunities', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentId: currentUser.id, opportunityId: id, opportunityType: type })
+      });
+      if (res.ok) {
+        setSavedOpportunityIds(prev => [...prev, id]);
+        addToast({ type: 'success', title: 'Opportunity Saved', message: 'Added to your saved list.' });
+      }
+    } catch (err) {
+      console.error('Error saving opportunity:', err);
+    }
+  };
+
+  const unsaveOpportunity = async (id: string) => {
+    try {
+      const res = await fetch(`/api/saved-opportunities?studentId=${currentUser.id}&opportunityId=${id}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        setSavedOpportunityIds(prev => prev.filter(savedId => savedId !== id));
+        addToast({ type: 'info', title: 'Opportunity Removed', message: 'Removed from your saved list.' });
+      }
+    } catch (err) {
+      console.error('Error unsaving opportunity:', err);
+    }
+  };
+
+  // Fetch Saved Mentors
+  const fetchSavedMentors = useCallback(async (targetUserId?: string) => {
+    try {
+      const uId = targetUserId || currentUserIdRef.current;
+      if (!uId) return;
+
+      const res = await fetch(`/api/saved-mentors?studentId=${uId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setSavedMentorIds(data.savedMentorIds || []);
+      }
+    } catch (err) {
+      console.error('Error fetching saved mentors:', err);
+    }
+  }, []);
+
+  const saveMentor = async (id: string) => {
+    try {
+      const res = await fetch('/api/saved-mentors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentId: currentUser.id, mentorId: id })
+      });
+      if (res.ok) {
+        setSavedMentorIds(prev => [...prev, id]);
+        addToast({ type: 'success', title: 'Mentor Saved', message: 'Added to your saved list.' });
+      }
+    } catch (err) {
+      console.error('Error saving mentor:', err);
+    }
+  };
+
+  const unsaveMentor = async (id: string) => {
+    try {
+      const res = await fetch(`/api/saved-mentors?studentId=${currentUser.id}&mentorId=${id}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        setSavedMentorIds(prev => prev.filter(savedId => savedId !== id));
+        addToast({ type: 'info', title: 'Mentor Removed', message: 'Removed from your saved list.' });
+      }
+    } catch (err) {
+      console.error('Error unsaving mentor:', err);
+    }
+  };
+
   // Refresh all application data once on initial load
   const refreshAllData = useCallback(async () => {
     await Promise.all([
@@ -305,9 +406,11 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       fetchRequests(currentUserIdRef.current, currentUserRef.current?.role),
       fetchNotifications(currentUserIdRef.current),
       fetchRatings(),
-      fetchVerifications()
+      fetchVerifications(),
+      fetchSavedOpportunities(currentUserIdRef.current),
+      fetchSavedMentors(currentUserIdRef.current)
     ]);
-  }, [fetchSkillsAndDomains, fetchStudents, fetchRequests, fetchNotifications, fetchRatings, fetchVerifications]);
+  }, [fetchSkillsAndDomains, fetchStudents, fetchRequests, fetchNotifications, fetchRatings, fetchVerifications, fetchSavedOpportunities, fetchSavedMentors]);
 
   // Initial load only
   useEffect(() => {
@@ -337,13 +440,16 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   }, [isLoggedIn, fetchRequests, fetchNotifications, fetchStudents, fetchRatings]);
 
   // Login with student ID or Email against Neon PostgreSQL
-  const loginWithStudentId = async (studentIdOrEmail: string): Promise<boolean> => {
+  const loginWithStudentId = async (studentIdOrEmail: string, password?: string): Promise<boolean> => {
     setIsLoading(true);
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identifier: studentIdOrEmail })
+        body: JSON.stringify({ 
+          identifier: studentIdOrEmail,
+          password: password || 'demo123'
+        })
       });
       const data = await res.json();
       if (res.ok && data.user) {
@@ -378,7 +484,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       addToast({
         type: 'error',
         title: 'Connection Error',
-        message: err.message || 'Failed to connect to Neon database'
+        message: err.message || 'Unable to sign in. Please try again.'
       });
       return false;
     } finally {
@@ -446,7 +552,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         addToast({
           type: 'success',
           title: 'Registration Complete!',
-          message: `Account created for ${data.user.name} (${data.user.studentId}) in IMT database.`
+          message: `Welcome to IMT Skill Exchange, ${data.user.name}!`
         });
         await Promise.all([
           fetchRequests(data.user.id, data.user.role),
@@ -466,7 +572,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       addToast({
         type: 'error',
         title: 'Registration Error',
-        message: err.message || 'Failed to connect to Neon database'
+        message: err.message || 'Registration failed. Please try again.'
       });
       return false;
     } finally {
@@ -491,12 +597,16 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const resetDatabaseData = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/seed', { method: 'POST' });
+      const res = await fetch('/api/seed', { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ secret: 'imt-skill-exchange-admin' })
+      });
       if (res.ok) {
         addToast({
           type: 'success',
-          title: 'Database Reset Complete',
-          message: 'All 226 placement jobs, 75 internships, and 5 student personas re-seeded in Neon PostgreSQL.'
+          title: 'Data Refresh Complete',
+          message: 'Platform data has been refreshed successfully (226 JDs, 75 SIPs, 5 demo profiles).'
         });
         await refreshAllData();
       }
@@ -534,7 +644,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         addToast({
           type: 'success',
           title: 'Request Sent Successfully!',
-          message: 'Your peer mentoring request has been stored in Neon PostgreSQL and the mentor has been notified.'
+          message: 'Your mentoring request has been sent! The mentor will be notified.'
         });
         await fetchRequests();
         return true;
@@ -663,7 +773,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         addToast({
           type: 'success',
           title: 'Review Submitted!',
-          message: `Thank you! Your ${data.rating}★ rating and feedback have updated the mentor's score in PostgreSQL.`
+          message: `Thank you! Your ${data.rating}★ review has been submitted successfully.`
         });
         await fetchRatings();
         await fetchRequests();
@@ -715,6 +825,43 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       if (res.ok) {
         addToast({ type: 'info', title: 'Skill Removed', message: 'Removed from teaching skills.' });
         await fetchStudents();
+        return true;
+      }
+      return false;
+    } catch (err: any) {
+      addToast({ type: 'error', title: 'Error', message: err.message });
+      return false;
+    }
+  };
+
+  const toggleSkillAvailability = async (skillId: string, isAvailable: boolean): Promise<boolean> => {
+    try {
+      const res = await fetch('/api/skills', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          studentId: currentUser.id,
+          skillId,
+          isAvailable
+        })
+      });
+      if (res.ok) {
+        addToast({
+          type: 'success',
+          title: 'Availability Updated',
+          message: `You are now ${isAvailable ? 'available' : 'unavailable'} to teach this skill.`
+        });
+        
+        // Optimistic update
+        setCurrentUser((prev) => ({
+          ...prev,
+          skillsToTeach: prev.skillsToTeach?.map((skill) =>
+            skill.skillId === skillId ? { ...skill, isAvailable } : skill
+          ) || []
+        }));
+        
+        // Also update background data
+        fetchStudents();
         return true;
       }
       return false;
@@ -942,6 +1089,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         switchPersona,
         logout,
         updateCurrentUser,
+        savedOpportunityIds,
+        saveOpportunity,
+        unsaveOpportunity,
+        savedMentorIds,
+        saveMentor,
+        unsaveMentor,
 
         resetDatabaseData,
         sendMentoringRequest,
@@ -951,6 +1104,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         submitRatingReview,
         addTeachingSkill,
         removeTeachingSkill,
+        toggleSkillAvailability,
         addLearningSkill,
         removeLearningSkill,
         submitSkillVerification,

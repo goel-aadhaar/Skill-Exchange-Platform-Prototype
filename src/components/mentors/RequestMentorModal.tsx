@@ -197,7 +197,7 @@ export const RequestMentorModal: React.FC<RequestMentorModalProps> = ({
             className="px-5 py-2 text-xs font-extrabold text-slate-900 bg-amber-400 hover:bg-amber-500 rounded-xl shadow-md transition-all flex items-center gap-1.5"
           >
             <Send className="w-3.5 h-3.5 text-slate-900" />
-            <span>{isSubmitting ? 'Storing in PostgreSQL...' : 'Submit Mentoring Request'}</span>
+            <span>{isSubmitting ? 'Sending request...' : 'Submit Mentoring Request'}</span>
           </button>
         </div>
       </form>
