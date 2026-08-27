@@ -97,7 +97,7 @@ export const SessionWorkspaceModal: React.FC<SessionWorkspaceModalProps> = ({
           {/* Participant chips */}
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5 bg-white/10 px-2.5 py-1 rounded-lg text-xs font-medium text-slate-200">
-              <div className="w-5 h-5 rounded-full bg-[#8B1E2D] text-white flex items-center justify-center font-bold text-[10px]">
+              <div className="w-5 h-5 rounded-full bg-[#0F2942] text-amber-400 border border-amber-400/30 flex items-center justify-center font-bold text-[10px]">
                 {currentUser.avatar}
               </div>
               <span>You ({isMentor ? 'Mentor' : 'Learner'})</span>
@@ -158,7 +158,7 @@ export const SessionWorkspaceModal: React.FC<SessionWorkspaceModalProps> = ({
               </div>
             </div>
 
-            <div className="w-14 h-14 rounded-full bg-[#8B1E2D] text-white font-bold text-lg flex items-center justify-center mx-auto border border-white/20 shadow-md">
+            <div className="w-14 h-14 rounded-full bg-[#0F2942] text-amber-400 border border-amber-400/30 font-bold text-lg flex items-center justify-center mx-auto shadow-md">
               {currentUser.avatar}
             </div>
 
@@ -172,7 +172,7 @@ export const SessionWorkspaceModal: React.FC<SessionWorkspaceModalProps> = ({
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <FileText className="w-4 h-4 text-[#8B1E2D]" />
+              <FileText className="w-4 h-4 text-amber-500" />
               <label className="text-xs font-bold text-slate-900 uppercase tracking-wider">
                 Shared Real-Time Session Scratchpad & Code Editor
               </label>
@@ -186,7 +186,7 @@ export const SessionWorkspaceModal: React.FC<SessionWorkspaceModalProps> = ({
             value={sessionNotes}
             onChange={(e) => setSessionNotes(e.target.value)}
             rows={8}
-            className="w-full p-3.5 text-xs font-mono bg-slate-900 text-slate-100 rounded-xl border border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#8B1E2D] resize-none leading-relaxed"
+            className="w-full p-3.5 text-xs font-mono bg-slate-900 text-slate-100 rounded-xl border border-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none leading-relaxed"
           />
         </div>
 

@@ -312,6 +312,37 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ onGoToLogin }) => {
             </h3>
 
             <div className="space-y-3">
+              {/* Skill Selector Row */}
+              <div className="flex gap-2">
+                <select
+                  value={step === 3 ? teachSearch : learnSearch}
+                  onChange={(e) => (step === 3 ? setTeachSearch(e.target.value) : setLearnSearch(e.target.value))}
+                  className="flex-1 px-3 py-2 text-xs bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-medium"
+                >
+                  <option value="">-- Choose a skill to {step === 3 ? 'teach' : 'learn'} --</option>
+                  {skills.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} ({s.domain})
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const selId = step === 3 ? teachSearch : learnSearch;
+                    const sk = skills.find((s) => s.id === selId);
+                    if (sk) {
+                      if (step === 3) addTeachSkill(sk);
+                      else addLearnSkill(sk);
+                    }
+                  }}
+                  className="px-4 py-2 bg-[#0F2942] hover:bg-slate-900 text-amber-400 font-bold rounded-xl text-xs flex items-center gap-1 shadow-xs"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add</span>
+                </button>
+              </div>
+
               {step === 3 ? (
                 <div className="space-y-2">
                   {skillsToTeach.map((s) => (
@@ -323,12 +354,17 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ onGoToLogin }) => {
                       <button
                         type="button"
                         onClick={() => removeTeachSkill(s.skillId)}
-                        className="text-rose-600 hover:underline"
+                        className="text-rose-600 font-semibold hover:underline"
                       >
                         Remove
                       </button>
                     </div>
                   ))}
+                  {skillsToTeach.length === 0 && (
+                    <p className="text-xs text-slate-400 italic py-2">
+                      No teaching skills added yet. Select from the dropdown above.
+                    </p>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -341,12 +377,17 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ onGoToLogin }) => {
                       <button
                         type="button"
                         onClick={() => removeLearnSkill(s.skillId)}
-                        className="text-rose-600 hover:underline"
+                        className="text-rose-600 font-semibold hover:underline"
                       >
                         Remove
                       </button>
                     </div>
                   ))}
+                  {skillsToLearn.length === 0 && (
+                    <p className="text-xs text-slate-400 italic py-2">
+                      No learning goals added yet. Select from the dropdown above.
+                    </p>
+                  )}
                 </div>
               )}
             </div>

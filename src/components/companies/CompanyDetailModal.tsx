@@ -172,9 +172,9 @@ export const CompanyDetailModal: React.FC<CompanyDetailModalProps> = ({
                       onClose();
                       onFindMentorForSkill(item.name);
                     }}
-                    className="shrink-0 text-[11px] font-bold text-white bg-[#8B1E2D] hover:bg-[#701420] px-2 py-1 rounded transition-colors shadow-2xs inline-flex items-center gap-1"
+                    className="shrink-0 text-[11px] font-bold text-amber-400 bg-[#0F2942] hover:bg-slate-900 px-2.5 py-1 rounded-lg transition-colors shadow-2xs inline-flex items-center gap-1"
                   >
-                    <Users className="w-3 h-3" />
+                    <Users className="w-3 h-3 text-amber-400" />
                     Find Mentor
                   </button>
                 )}
@@ -209,7 +209,7 @@ export const CompanyDetailModal: React.FC<CompanyDetailModalProps> = ({
                         {role.type}
                       </span>
                     </div>
-                    <div className="text-xs text-[#8B1E2D] font-bold mt-0.5">
+                    <div className="text-xs text-blue-900 font-bold mt-0.5">
                       Compensation: {role.ctcOrStipend}
                     </div>
                   </div>

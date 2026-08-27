@@ -196,13 +196,26 @@ export const MyRequestsView: React.FC = () => {
                       )}
 
                       {statusNormalized === 'COMPLETED' && !isMentor && (
-                        <button
-                          onClick={() => setSelectedRequestForRating(r)}
-                          className="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 hover:bg-amber-100 px-3 py-1.5 rounded flex items-center gap-1 transition-colors"
-                        >
-                          <Star className="w-3 h-3 fill-current" />
-                          Rate
-                        </button>
+                        ratings.some(rt => rt.requestId === r.id) ? (
+                          <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg">
+                            Rated ★
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setSelectedRequestForRating(r)}
+                            className="text-xs font-bold text-amber-900 bg-amber-400 hover:bg-amber-500 px-3 py-1.5 rounded-lg flex items-center gap-1 transition-colors shadow-2xs"
+                          >
+                            <Star className="w-3 h-3 fill-current" />
+                            Rate Mentor
+                          </button>
+                        )
+                      )}
+
+                      {statusNormalized === 'COMPLETED' && isMentor && (
+                        <span className="text-xs text-slate-500 font-medium">
+                          Completed
+                        </span>
                       )}
                     </div>
                   </td>
