@@ -41,7 +41,7 @@ export const RecommendedMentors: React.FC<RecommendedMentorsProps> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
         <div>
           <h2 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2">
             <Users className="w-4 h-4 text-blue-900" />

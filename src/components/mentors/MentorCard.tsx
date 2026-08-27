@@ -29,7 +29,7 @@ export const MentorCard: React.FC<MentorCardProps> = ({
 
   return (
     <div className="bg-white border-b border-slate-200 py-5 last:border-b-0 hover:bg-slate-50 transition-colors">
-      <div className="flex flex-col sm:flex-row gap-4 justify-between">
+      <div className="flex flex-col sm:flex-row flex-wrap gap-4 justify-between items-start md:items-center">
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-1">
             <h3 className="text-sm font-bold text-slate-900">
@@ -79,7 +79,7 @@ export const MentorCard: React.FC<MentorCardProps> = ({
           </div>
         </div>
 
-        <div className="flex flex-row items-center justify-end gap-2 shrink-0">
+        <div className="flex flex-row flex-wrap items-center justify-start sm:justify-end gap-2 shrink-0 w-full sm:w-auto">
           {onToggleSave && (
             <button
               type="button"

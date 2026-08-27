@@ -93,7 +93,7 @@ export const SkillGapCard: React.FC<SkillGapCardProps> = ({
       </div>
 
       {/* Signature Grid: Required Skill vs Student State vs Peer Supply */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         {prioritizedSkills.map(({ skill, studentLevel, isMissingOrBeginner, availableMentorsCount }) => (
           <div
             key={skill.id}
@@ -130,7 +130,7 @@ export const SkillGapCard: React.FC<SkillGapCardProps> = ({
               </p>
 
               {/* Status Comparison Indicator */}
-              <div className="flex items-center gap-3 text-xs pt-1">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs pt-1">
                 <div className="flex items-center gap-1.5 text-slate-600">
                   <span className="text-[11px] text-slate-400 font-bold uppercase">Your Level:</span>
                   <span className={`font-bold ${isMissingOrBeginner ? 'text-amber-800' : 'text-emerald-700'}`}>
@@ -145,7 +145,7 @@ export const SkillGapCard: React.FC<SkillGapCardProps> = ({
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-200/60 flex items-center justify-between">
+            <div className="pt-3 border-t border-slate-200/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <div className="flex items-center gap-1.5 text-xs text-slate-600">
                 <Users className="w-3.5 h-3.5 text-blue-900 shrink-0" />
                 <span className="font-extrabold text-slate-900 font-data">{availableMentorsCount}</span>

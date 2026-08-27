@@ -16,9 +16,11 @@ export const DashboardView: React.FC = () => {
       <StatCards currentUser={currentUser} requests={requests} />
       <IncomingRequestsBanner />
       
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <SkillGapCard currentUser={currentUser} skills={skills} students={students} />
-        <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div className="lg:col-span-3">
+          <SkillGapCard currentUser={currentUser} skills={skills} students={students} />
+        </div>
+        <div className="lg:col-span-2 space-y-6">
           {/* Note: Omit UpcomingDrives because it needs companies which isn't directly in AppContext right now */}
           <RecommendedMentors currentUser={currentUser} students={students} />
         </div>
