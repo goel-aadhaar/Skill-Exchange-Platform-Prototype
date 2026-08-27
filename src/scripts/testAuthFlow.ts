@@ -17,7 +17,7 @@ async function testAuth() {
       availability, rating, ratings_count, sessions_completed, is_verified, role, created_at
     ) VALUES (
       $1, $2, $3, $4, 'secure_password_123', 'TS', 'PGDM (Analytics)', 'Data Science & IT',
-      'Year 1 (Batch 2024–2026)', 2026, 'Test registered user for authentication flow testing.',
+      'Year 1 (2026 - 2028)', 2026, 'Test registered user for authentication flow testing.',
       'Data Analytics', 'Business Analyst', 'Deloitte Placement', 'Weekdays 7 PM', 5.0, 0, 0, false, 'student', NOW()
     )`,
     [userId, 'Test Student Candidate', testStudentId, testEmail]

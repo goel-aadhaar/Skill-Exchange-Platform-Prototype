@@ -130,7 +130,7 @@ const DEFAULT_USER: Student = {
   avatar: 'TG',
   program: 'PGDM (Analytics)',
   specialization: 'Data Analytics & IT',
-  academicYear: 'Year 1 (Batch 2024–2026)',
+  academicYear: 'Year 1 (2026 - 2028)',
   graduationYear: 2026,
   bio: 'First-year PGDM student at IMT Hyderabad targeting Business Analyst and Consulting roles.',
   targetDomain: 'Data Analytics',

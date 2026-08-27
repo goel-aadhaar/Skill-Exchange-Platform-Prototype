@@ -41,7 +41,7 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ onGoToLogin }) => {
   const [cgpa, setCgpa] = useState('8.50');
   const [program, setProgram] = useState('PGDM (General)');
   const [specialization, setSpecialization] = useState('Data Analytics & IT');
-  const [academicYear, setAcademicYear] = useState('Year 1 (Batch 2024–2026)');
+  const [academicYear, setAcademicYear] = useState('Year 1 (2026 - 2028)');
   const [graduationYear, setGraduationYear] = useState(2026);
 
   // Step 2: Career Goals Fields
@@ -388,8 +388,8 @@ export const RegisterView: React.FC<RegisterViewProps> = ({ onGoToLogin }) => {
                   onChange={(e) => setAcademicYear(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-medium focus:ring-2 focus:ring-amber-500 focus:bg-white"
                 >
-                  <option value="Year 1 (Batch 2024–2026)">Year 1 (Batch 2024–2026)</option>
-                  <option value="Year 2 (Batch 2023–2025)">Year 2 (Batch 2023–2025)</option>
+                  <option value="Year 1 (2026 - 2028)">Year 1 (2026 - 2028)</option>
+                  <option value="Year 2 (2025-2027)">Year 2 (2025-2027)</option>
                 </select>
               </div>
             </div>
